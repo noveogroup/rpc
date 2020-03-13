@@ -12,6 +12,10 @@ interface RPCMessage {
   result: any;
 }
 
+interface DeviceSocket extends WebSocket {
+  deviceId: id;
+}
+
 class Request {
   private server: Server;
   private timer: number;
@@ -48,32 +52,32 @@ class Request {
   }
 }
 
-export default class Server {
-  private wss: WebSocket.Server;
-
-  private clients: Map<id, WebSocket>;
+export default class Server extends WebSocket.Server {
+  private devices: Map<id, WebSocket>;
 
   private methods: Map<name, Function>;
 
   requests: Map<id, Request>;
 
-  constructor(param: ServerOptions) {
-    this.clients = new Map();
+  constructor(params: ServerOptions) {
+    super(params);
+    this.devices = new Map();
     this.methods = new Map();
     this.requests = new Map();
 
-    this.wss = new WebSocket.Server(param);
-
-    this.wss.on('connection', (ws) => {
+    this.on('connection', (ws: DeviceSocket) => {
       // Event on removing the client
-      // ? ws.on('close', () => {});
+      ws.on('close', () => {
+        this.devices.delete(ws.deviceId);
+      });
       // Message processing
       ws.on('message', async (string: string) => {
         const message: RPCMessage = JSON.parse(string);
         switch (message.method) {
           case 'connect':
             {
-              this.clients.set(message.params.id, ws);
+              this.devices.set(message.params.id, ws);
+              ws.deviceId = message.params.id;
             }
             break;
           default: {
@@ -120,11 +124,11 @@ export default class Server {
     params: object,
   ): Promise<object> {
     const id = v4();
-    if (!this.clients.has(clientId)) {
+    if (!this.devices.has(clientId)) {
       throw new Error('');
     }
     // @ts-ignore
-    this.clients.get(clientId).send(
+    this.devices.get(clientId).send(
       JSON.stringify({
         jsonrpc: '2.0',
         method,
