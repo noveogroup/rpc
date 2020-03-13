@@ -9,7 +9,7 @@ const server = new Server({
 	port: 8080,
 });
 
-const client = new Client('id1', 'ws://localhost:8081');
+const client = new Client('id1', 'ws://localhost:8080');
 
 client.register('hi', (params) => {
 	console.log('client hi', params);
