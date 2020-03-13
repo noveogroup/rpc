@@ -109,7 +109,7 @@ export default class Client {
     });
   }
 
-  async call(method: string, params: object, _config: object): Promise<object> {
+  async call(method: string, params: object): Promise<object> {
     const id = v4();
     this.ws.send(
       JSON.stringify({

@@ -1,16 +1,16 @@
 {
-  "name": "rpc",
-  "version": "1.0.0",
+  "name": "@noveo/dual-rpc-ws",
+  "version": "0.0.2",
   "description": "Remote procedure call",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
     "test": "tsc --build tsconfig.json && node build/test.js",
     "build": "tsc --build tsconfig.json",
-    "prepublish": "build"
+    "prepublish": "npm run-script build"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "uuid": "^7.0.2",
     "ws": "^7.2.3"
