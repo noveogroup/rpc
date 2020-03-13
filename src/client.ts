@@ -1,5 +1,5 @@
 import WebSocket, { ClientOptions, ServerOptions } from 'ws';
-import uuid from 'uuid';
+import { v4 } from 'uuid';
 
 type id = string;
 type name = string;
@@ -33,7 +33,10 @@ class Request {
     id: string;
   }) {
     this.client = client;
-    this.timer = (setTimeout(this.destructor, timeout) as any) as number;
+    this.timer = (setTimeout(
+      this.destructor.bind(this),
+      timeout,
+    ) as any) as number;
     this.resolve = resolve;
     this.reject = reject;
     this.id = id;
@@ -70,26 +73,30 @@ export default class Client {
       );
     });
 
-    this.ws.on('message', (string: string) => {
+    this.ws.on('message', async (string: string) => {
       const message: RPCMessage = JSON.parse(string);
       // request
       if (message.method) {
         try {
           // @ts-ignore
-          const result = this.methods
+          const result = await this.methods
             .get(message.method)
-            .apply(this, message.params);
-          this.ws.send({
-            jsonrpc: '2.0',
-            result,
-            id: message.id,
-          });
+            .call(this, message.params);
+          this.ws.send(
+            JSON.stringify({
+              jsonrpc: '2.0',
+              result,
+              id: message.id,
+            }),
+          );
         } catch (error) {
-          this.ws.send({
-            jsonrpc: '2.0',
-            error,
-            id: message.id,
-          });
+          this.ws.send(
+            JSON.stringify({
+              jsonrpc: '2.0',
+              error,
+              id: message.id,
+            }),
+          );
         }
       } else {
         // response
@@ -103,13 +110,15 @@ export default class Client {
   }
 
   async call(method: string, params: object): Promise<object> {
-    const id = uuid.v4();
-    this.ws.send({
-      jsonrpc: '2.0',
-      method,
-      params,
-      id,
-    });
+    const id = v4();
+    this.ws.send(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        method,
+        params,
+        id,
+      }),
+    );
     return new Promise((resolve, reject) => {
       this.requests.set(
         id,

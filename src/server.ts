@@ -1,5 +1,5 @@
 import WebSocket, { ServerOptions } from 'ws';
-import uuid from 'uuid';
+import { v4 } from 'uuid';
 
 type id = string;
 type name = string;
@@ -33,7 +33,10 @@ class Request {
     id: string;
   }) {
     this.server = server;
-    this.timer = (setTimeout(this.destructor, timeout) as any) as number;
+    this.timer = (setTimeout(
+      this.destructor.bind(this),
+      timeout,
+    ) as any) as number;
     this.resolve = resolve;
     this.reject = reject;
     this.id = id;
@@ -62,7 +65,7 @@ export default class Server {
     this.wss = new WebSocket.Server(param);
 
     this.wss.on('connection', (ws) => {
-      ws.on('message', (string: string) => {
+      ws.on('message', async (string: string) => {
         const message: RPCMessage = JSON.parse(string);
         switch (message.method) {
           case 'connect':
@@ -75,9 +78,9 @@ export default class Server {
             if (message.method) {
               try {
                 // @ts-ignore
-                const result = this.methods
+                const result = await this.methods
                   .get(message.method)
-                  .apply(this, message.params);
+                  .call(this, message.params);
                 ws.send(
                   JSON.stringify({
                     jsonrpc: '2.0',
@@ -113,17 +116,19 @@ export default class Server {
     method: string,
     params: object,
   ): Promise<object> {
-    const id = uuid.v4();
+    const id = v4();
     if (!this.clients.has(clientId)) {
       throw new Error('');
     }
     // @ts-ignore
-    this.clients.get(clientId).send({
-      jsonrpc: '2.0',
-      method,
-      params,
-      id,
-    });
+    this.clients.get(clientId).send(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        method,
+        params,
+        id,
+      }),
+    );
     return new Promise((resolve, reject) => {
       this.requests.set(
         id,
