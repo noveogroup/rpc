@@ -9,7 +9,7 @@ const server = new Server({
 	port: 8080,
 });
 
-const client = new Client('ws://localhost:8080', '1');
+const client = new Client('id1', 'ws://localhost:8081');
 
 client.register('hi', (params) => {
 	console.log('client hi', params);
@@ -24,7 +24,7 @@ server.register('hi', (params) => {
 setTimeout(async () => {
 	const [a, b] = await Promise.all([
 		client.call('hi', { a: 1 }),
-		server.call('1', 'hi', { b: 2 }),
+		server.call('id1', 'hi', { b: 2 }),
 	]);
 	console.log(a, b);
 }, 2000);

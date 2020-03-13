@@ -1,5 +1,7 @@
 import WebSocket, { ClientOptions, ServerOptions } from 'ws';
 import { v4 } from 'uuid';
+import * as http from 'http';
+import * as url from 'url';
 
 type id = string;
 type name = string;
@@ -48,21 +50,24 @@ class Request {
   }
 }
 
-export default class Client {
-  private ws: WebSocket;
-
+export default class Client extends WebSocket {
   private methods: Map<name, Function>;
 
   requests: Map<id, Request>;
 
-  constructor(address: string, cid: id) {
+  constructor(
+    cid: id,
+    address: string | url.URL,
+    protocols?: string | string[],
+    options?: WebSocket.ClientOptions | http.ClientRequestArgs,
+  ) {
+    super(address, protocols, options);
+
     this.methods = new Map();
     this.requests = new Map();
 
-    this.ws = new WebSocket(address);
-
-    this.ws.on('open', () => {
-      this.ws.send(
+    this.on('open', () => {
+      this.send(
         JSON.stringify({
           jsonrpc: '2.0',
           method: 'connect',
@@ -73,7 +78,7 @@ export default class Client {
       );
     });
 
-    this.ws.on('message', async (string: string) => {
+    this.on('message', async (string: string) => {
       const message: RPCMessage = JSON.parse(string);
       // request
       if (message.method) {
@@ -82,7 +87,7 @@ export default class Client {
           const result = await this.methods
             .get(message.method)
             .call(this, message.params);
-          this.ws.send(
+          this.send(
             JSON.stringify({
               jsonrpc: '2.0',
               result,
@@ -90,7 +95,7 @@ export default class Client {
             }),
           );
         } catch (error) {
-          this.ws.send(
+          this.send(
             JSON.stringify({
               jsonrpc: '2.0',
               error,
@@ -111,7 +116,7 @@ export default class Client {
 
   async call(method: string, params: object): Promise<object> {
     const id = v4();
-    this.ws.send(
+    this.send(
       JSON.stringify({
         jsonrpc: '2.0',
         method,
