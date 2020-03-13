@@ -1,6 +1,6 @@
 {
   "name": "@noveo/dual-rpc-ws",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Remote procedure call",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -12,6 +12,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "isomorphic-ws": "^4.0.1",
     "uuid": "^7.0.2",
     "ws": "^7.2.3"
   },

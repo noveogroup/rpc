@@ -1,4 +1,4 @@
-import WebSocket, { ClientOptions, ServerOptions } from 'ws';
+import WebSocket from 'isomorphic-ws';
 import { v4 } from 'uuid';
 import * as http from 'http';
 import * as url from 'url';
