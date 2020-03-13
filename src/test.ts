@@ -23,3 +23,10 @@ setTimeout(async () => {
   ]);
   console.log(a, b);
 }, 2000);
+
+/*
+В терминале
+server hi { a: 1 }
+client hi { b: 2 }
+hello, 1 hello, 2
+ */

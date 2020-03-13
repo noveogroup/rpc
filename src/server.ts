@@ -65,6 +65,9 @@ export default class Server {
     this.wss = new WebSocket.Server(param);
 
     this.wss.on('connection', (ws) => {
+      // Event on removing the client
+      // ? ws.on('close', () => {});
+      // Message processing
       ws.on('message', async (string: string) => {
         const message: RPCMessage = JSON.parse(string);
         switch (message.method) {

@@ -55,7 +55,7 @@ export default class Client {
 
   requests: Map<id, Request>;
 
-  constructor(address: string, id: string) {
+  constructor(address: string, cid: id) {
     this.methods = new Map();
     this.requests = new Map();
 
@@ -67,7 +67,7 @@ export default class Client {
           jsonrpc: '2.0',
           method: 'connect',
           params: {
-            id,
+            id: cid,
           },
         }),
       );
@@ -109,7 +109,7 @@ export default class Client {
     });
   }
 
-  async call(method: string, params: object): Promise<object> {
+  async call(method: string, params: object, _config: object): Promise<object> {
     const id = v4();
     this.ws.send(
       JSON.stringify({
