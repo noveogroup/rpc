@@ -69,7 +69,7 @@ export default class Client extends WebSocket {
     });
 
     this.addEventListener('message', async (string: any) => {
-      const message: RPCMessage = JSON.parse(string.toString());
+      const message: RPCMessage = JSON.parse(string.data.toString());
       // request
       if (message.method) {
         try {
