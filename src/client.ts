@@ -1,8 +1,3 @@
-import WebSocket from 'isomorphic-ws';
-import { v4 } from 'uuid';
-import * as http from 'http';
-import * as url from 'url';
-
 type id = string;
 type name = string;
 
@@ -55,18 +50,13 @@ export default class Client extends WebSocket {
 
   requests: Map<id, Request>;
 
-  constructor(
-    cid: id,
-    address: string | url.URL,
-    protocols?: string | string[],
-    options?: WebSocket.ClientOptions | http.ClientRequestArgs,
-  ) {
-    super(address, protocols, options);
+  constructor(cid: id, address: string, protocols?: string | string[]) {
+    super(address, protocols);
 
     this.methods = new Map();
     this.requests = new Map();
 
-    this.on('open', () => {
+    this.addEventListener('open', () => {
       this.send(
         JSON.stringify({
           jsonrpc: '2.0',
@@ -78,8 +68,8 @@ export default class Client extends WebSocket {
       );
     });
 
-    this.on('message', async (string: string) => {
-      const message: RPCMessage = JSON.parse(string);
+    this.addEventListener('message', async (string: any) => {
+      const message: RPCMessage = JSON.parse(string.toString());
       // request
       if (message.method) {
         try {
@@ -115,7 +105,7 @@ export default class Client extends WebSocket {
   }
 
   async call(method: string, params: object): Promise<object> {
-    const id = v4();
+    const id = Date.now().toString();
     this.send(
       JSON.stringify({
         jsonrpc: '2.0',

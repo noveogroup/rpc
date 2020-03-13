@@ -1,13 +1,11 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
-    "target": "ES2019",
+    "target": "ES6",
+    "module": "commonjs",
     "sourceMap": true,
     "strict": true,
     "outDir": "build",
-    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": false,
     "noUnusedParameters": true,
@@ -15,10 +13,11 @@
     "watch": true,
     "declaration": true
   },
+  "lib": ["es5", "es2015.promise", "dom", "es2015"],
   "exclude": [
     "node_modules"
   ],
   "include": [
-    "src/server.ts"
+    "src/client.ts"
   ]
 }
