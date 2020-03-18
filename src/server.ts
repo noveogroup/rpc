@@ -78,6 +78,32 @@ export default class Server extends WebSocket.Server {
             {
               this.devices.set(message.params.id, ws);
               ws.deviceId = message.params.id;
+              if (this.listenerCount('handshake') === 1) {
+                this.emit('handshake', message.params.id, (result: boolean) => {
+                  ws.send(
+                    JSON.stringify({
+                      jsonrpc: '2.0',
+                      method: 'connect',
+                      params: {
+                        result,
+                      },
+                    }),
+                  );
+                  if (!result) {
+                    ws.close();
+                  }
+                });
+              } else {
+                ws.send(
+                  JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'connect',
+                    params: {
+                      result: true,
+                    },
+                  }),
+                );
+              }
             }
             break;
           default: {
@@ -107,7 +133,7 @@ export default class Server extends WebSocket.Server {
             } else {
               // response
               if (!this.requests.has(message.id)) {
-                throw new Error('');
+                throw new Error(`Wrong request id: ${message.id}`);
               }
               // @ts-ignore
               this.requests.get(message.id).resolve(message.result);
@@ -125,7 +151,7 @@ export default class Server extends WebSocket.Server {
   ): Promise<object> {
     const id = v4();
     if (!this.devices.has(clientId)) {
-      throw new Error('');
+      throw new Error(`Device with id: ${clientId} doesn't connected`);
     }
     // @ts-ignore
     this.devices.get(clientId).send(

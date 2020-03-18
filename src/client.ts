@@ -45,6 +45,7 @@ class Request {
   }
 }
 
+// @ts-ignore
 export default class Client extends WebSocket {
   private methods: Map<name, Function>;
 
@@ -72,6 +73,10 @@ export default class Client extends WebSocket {
       const message: RPCMessage = JSON.parse(string.data.toString());
       // request
       if (message.method) {
+        if (message.method === 'connect') {
+          this.dispatchEvent(new Event('handshake'));
+          return;
+        }
         try {
           // @ts-ignore
           const result = await this.methods

@@ -1,5 +1,20 @@
 # Dual rpc via websockets
 
+## Client class
+
+### Constructor (token: string, address: string)
+Connect to the server using an address and unique id that concrete the client
+
+### Methods
+
+### call(method: string, params?: object|Array): Promise\<object\>
+Call the server method using params as one argument construction.
+Returns a Promise with the JSON response from the server
+
+### register(method: string, handler: Function\<Promise\>): void
+Register the method on the client side, handler must return an object or a Promise\<object\> 
+which will be held on the server side 
+
 ## Example of usage
 
 ```javascript
