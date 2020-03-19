@@ -74,7 +74,9 @@ export default class Client extends WebSocket {
       // request
       if (message.method) {
         if (message.method === 'connect') {
-          this.dispatchEvent(new Event('handshake'));
+          this.dispatchEvent(
+            new CustomEvent('handshake', { detail: message.params.result }),
+          );
           return;
         }
         try {

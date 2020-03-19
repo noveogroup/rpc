@@ -8,9 +8,9 @@ const server = new Server({
   },
 });
 
-server.register('hi', (params: any) => {
+server.register('hi', (token: string, params: any) => {
   console.log('server hi', params);
-  return Promise.resolve(`hello, ${params.a}`);
+  return Promise.resolve(`${token}, hello, ${params.a}`);
 });
 
 server.register('ping', () => {

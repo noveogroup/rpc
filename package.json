@@ -1,6 +1,6 @@
 {
   "name": "@noveo/dual-rpc-ws",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Remote procedure call",
   "browser": "build/client.js",
   "main": "build/server.js",

@@ -17,7 +17,7 @@ interface RPCMessage {
 }
 
 interface DeviceSocket extends WebSocket {
-  deviceId: id;
+  token: id;
 }
 
 class Request {
@@ -75,7 +75,7 @@ export default class Server extends WebSocket.Server {
     this.on('connection', (ws: DeviceSocket) => {
       // Event on removing the client
       ws.on('close', () => {
-        this.devices.delete(ws.deviceId);
+        this.devices.delete(ws.token);
       });
       // Message processing
       ws.on('message', async (string: string) => {
@@ -84,7 +84,7 @@ export default class Server extends WebSocket.Server {
           case 'connect':
             {
               this.devices.set(message.params.id, ws);
-              ws.deviceId = message.params.id;
+              ws.token = message.params.id;
               let result = true;
               if (this.handshake) {
                 result = await this.handshake(message.params.id);
@@ -110,7 +110,7 @@ export default class Server extends WebSocket.Server {
                 // @ts-ignore
                 const result = await this.methods
                   .get(message.method)
-                  .call(this, message.params);
+                  .call(this, ws.token, message.params);
                 ws.send(
                   JSON.stringify({
                     jsonrpc: '2.0',
@@ -141,17 +141,13 @@ export default class Server extends WebSocket.Server {
     });
   }
 
-  async call(
-    clientId: string,
-    method: string,
-    params: object,
-  ): Promise<object> {
+  async call(token: string, method: string, params: object): Promise<object> {
     const id = v4();
-    if (!this.devices.has(clientId)) {
-      throw new Error(`Device with id: ${clientId} doesn't connected`);
+    if (!this.devices.has(token)) {
+      throw new Error(`Device with token: ${token} doesn't connected`);
     }
     // @ts-ignore
-    this.devices.get(clientId).send(
+    this.devices.get(token).send(
       JSON.stringify({
         jsonrpc: '2.0',
         method,
