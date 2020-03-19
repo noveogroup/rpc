@@ -1,8 +1,12 @@
-import WebSocket, { ServerOptions } from 'ws';
+import WebSocket, { ServerOptions as WSServerOptions } from 'ws';
 import { v4 } from 'uuid';
 
 type id = string;
 type name = string;
+
+interface ServerOptions extends WSServerOptions {
+  handshake?: (token: id) => Promise<boolean>;
+}
 
 interface RPCMessage {
   jsonrpc: string;
@@ -59,11 +63,14 @@ export default class Server extends WebSocket.Server {
 
   requests: Map<id, Request>;
 
+  private handshake: ((token: id) => Promise<boolean>) | undefined;
+
   constructor(params: ServerOptions) {
     super(params);
     this.devices = new Map();
     this.methods = new Map();
     this.requests = new Map();
+    this.handshake = params.handshake;
 
     this.on('connection', (ws: DeviceSocket) => {
       // Event on removing the client
@@ -78,31 +85,21 @@ export default class Server extends WebSocket.Server {
             {
               this.devices.set(message.params.id, ws);
               ws.deviceId = message.params.id;
-              if (this.listenerCount('handshake') === 1) {
-                this.emit('handshake', message.params.id, (result: boolean) => {
-                  ws.send(
-                    JSON.stringify({
-                      jsonrpc: '2.0',
-                      method: 'connect',
-                      params: {
-                        result,
-                      },
-                    }),
-                  );
-                  if (!result) {
-                    ws.close();
-                  }
-                });
-              } else {
-                ws.send(
-                  JSON.stringify({
-                    jsonrpc: '2.0',
-                    method: 'connect',
-                    params: {
-                      result: true,
-                    },
-                  }),
-                );
+              let result = true;
+              if (this.handshake) {
+                result = await this.handshake(message.params.id);
+              }
+              ws.send(
+                JSON.stringify({
+                  jsonrpc: '2.0',
+                  method: 'connect',
+                  params: {
+                    result,
+                  },
+                }),
+              );
+              if (!result) {
+                ws.close();
               }
             }
             break;

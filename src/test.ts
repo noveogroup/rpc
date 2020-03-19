@@ -2,6 +2,10 @@ import Server from './server';
 
 const server = new Server({
   port: 8081,
+  handshake: async (id) => {
+    console.log('connected', id);
+    return Promise.resolve(true);
+  },
 });
 
 server.register('hi', (params: any) => {
@@ -9,15 +13,14 @@ server.register('hi', (params: any) => {
   return Promise.resolve(`hello, ${params.a}`);
 });
 
-server.on('handshake', (id, callback) => {
-  console.log('connected', id);
-  callback(false);
+server.register('ping', () => {
+  return 'pong';
 });
 
 setInterval(async () => {
   try {
-    const [a, b] = await Promise.all([server.call('id1', 'hi', { b: 2 })]);
-    console.log(a, b);
+    const a = await server.call('id1', 'hi', { b: 2 });
+    console.log(a);
   } catch (e) {}
 }, 20000);
 
