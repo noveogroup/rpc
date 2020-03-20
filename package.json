@@ -1,6 +1,6 @@
 {
   "name": "@noveo/dual-rpc-ws",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Remote procedure call",
   "browser": "build/client.js",
   "main": "build/server.js",
@@ -8,7 +8,7 @@
   "scripts": {
     "test": "tsc --build tsconfig.json && tsc --build tsconfig.client.json && node build/test.js",
     "build": "tsc --build tsconfig.json && tsc --build tsconfig.client.json",
-    "prepublish": "npm run-script build"
+    "prepare": "npm run-script build"
   },
   "author": "",
   "license": "MIT",

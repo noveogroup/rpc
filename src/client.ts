@@ -51,11 +51,14 @@ export default class Client extends WebSocket {
 
   requests: Map<id, Request>;
 
+  handshake: (connected: boolean) => void;
+
   constructor(cid: id, address: string, protocols?: string | string[]) {
     super(address, protocols);
 
     this.methods = new Map();
     this.requests = new Map();
+    this.handshake = () => {};
 
     this.addEventListener('open', () => {
       this.send(
@@ -74,9 +77,7 @@ export default class Client extends WebSocket {
       // request
       if (message.method) {
         if (message.method === 'connect') {
-          this.dispatchEvent(
-            new CustomEvent('handshake', { detail: message.params.result }),
-          );
+          this.handshake(message.params.result);
           return;
         }
         try {

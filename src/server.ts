@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 type id = string;
 type name = string;
 
-interface ServerOptions extends WSServerOptions {
+export interface ServerOptions extends WSServerOptions {
   handshake?: (token: id) => Promise<boolean>;
 }
 
@@ -16,7 +16,7 @@ interface RPCMessage {
   result: any;
 }
 
-interface DeviceSocket extends WebSocket {
+export interface DeviceSocket extends WebSocket {
   token: id;
 }
 
