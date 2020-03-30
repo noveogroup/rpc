@@ -5,7 +5,7 @@ type id = string;
 type name = string;
 
 export interface ServerOptions extends WSServerOptions {
-  handshake?: (token: id) => Promise<boolean>;
+  handshake?: (token: id, ws: DeviceSocket) => Promise<boolean>;
 }
 
 interface RPCMessage {
@@ -25,7 +25,7 @@ class Request {
   private timer: number;
   resolve: Function;
   reject: Function;
-  private id: string;
+  private readonly id: string;
 
   constructor({
     server,
@@ -63,7 +63,7 @@ export default class Server extends WebSocket.Server {
 
   requests: Map<id, Request>;
 
-  private handshake: ((token: id, ws: DeviceSocket) => Promise<boolean>) | undefined;
+  private readonly handshake: ((token: id, ws: DeviceSocket) => Promise<boolean>) | undefined;
 
   constructor(params: ServerOptions) {
     super(params);
