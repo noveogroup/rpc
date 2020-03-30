@@ -63,7 +63,7 @@ export default class Server extends WebSocket.Server {
 
   requests: Map<id, Request>;
 
-  private handshake: ((token: id) => Promise<boolean>) | undefined;
+  private handshake: ((token: id, ws: DeviceSocket) => Promise<boolean>) | undefined;
 
   constructor(params: ServerOptions) {
     super(params);
@@ -87,7 +87,7 @@ export default class Server extends WebSocket.Server {
               ws.token = message.params.id;
               let result = true;
               if (this.handshake) {
-                result = await this.handshake(message.params.id);
+                result = await this.handshake(message.params.id, ws);
               }
               ws.send(
                 JSON.stringify({

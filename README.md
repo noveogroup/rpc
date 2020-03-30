@@ -22,9 +22,10 @@ In this time we can send messages to the server, the connection is accepted
 when `detail` argument is true. Otherwise the connection is aborted
 
 ## Server class
-### Constructor ({handshake?: (token: string) => Promise\<boolean\>, ...ws.ServerOptions})
+### Constructor ({handshake?: (token: string, ws: DeviceSocket) => Promise\<boolean\>, ...ws.ServerOptions})
 Setup the server with ws.ServerOptions object.
-`hanshake` is the handler for the new connections. It accepts client token and returns `true`
+`hanshake` is the handler for the new connections. It accepts client token, Websocket instance
+ of the new connection and returns `true`
 if connection can be established and false to broke the connection
 
 ### Methods
