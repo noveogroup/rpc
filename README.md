@@ -39,6 +39,11 @@ Register the method on the server side, handler accepts token of the client it w
 and params as an object and must return an object or a Promise\<object\> 
 which will be held on the client side 
 
+### Events
+
+### rpcClose(token: string)
+Fires when the socket connection closes
+
 ### Example of usage
 Client
 ```javascript

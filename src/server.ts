@@ -76,6 +76,7 @@ export default class Server extends WebSocket.Server {
       // Event on removing the client
       ws.on('close', () => {
         this.devices.delete(ws.token);
+        this.emit('rpcClose', ws.token);
       });
       // Message processing
       ws.on('message', async (string: string) => {
