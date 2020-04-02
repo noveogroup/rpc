@@ -22,6 +22,7 @@ export default class Client extends WebSocket {
           params: {
             id: cid,
           },
+          id: Date.now().toString(),
         }),
       );
     });

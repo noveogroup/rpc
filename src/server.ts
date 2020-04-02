@@ -51,6 +51,7 @@ export default class Server extends WebSocket.Server {
                   params: {
                     result,
                   },
+                  id: message.id
                 }),
               );
               if (!result) {
