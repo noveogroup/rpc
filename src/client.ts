@@ -1,51 +1,5 @@
-type id = string;
-type name = string;
+import { id, name, Request, RPCMessage } from './common';
 
-interface RPCMessage {
-  jsonrpc: string;
-  method: string;
-  params: Record<string, any>;
-  id: string;
-  result: any;
-}
-
-class Request {
-  private client: Client;
-  private timer: number;
-  resolve: Function;
-  reject: Function;
-  private id: string;
-
-  constructor({
-    client,
-    timeout,
-    resolve,
-    reject,
-    id,
-  }: {
-    client: Client;
-    timeout: number;
-    resolve: Function;
-    reject: Function;
-    id: string;
-  }) {
-    this.client = client;
-    this.timer = (setTimeout(
-      this.destructor.bind(this),
-      timeout,
-    ) as any) as number;
-    this.resolve = resolve;
-    this.reject = reject;
-    this.id = id;
-  }
-
-  destructor() {
-    this.client.requests.delete(this.id);
-    this.reject();
-  }
-}
-
-// @ts-ignore
 export default class Client extends WebSocket {
   private methods: Map<name, Function>;
 
@@ -127,7 +81,7 @@ export default class Client extends WebSocket {
         id,
         new Request({
           timeout: 5000,
-          client: this,
+          sender: this,
           resolve,
           reject,
           id,

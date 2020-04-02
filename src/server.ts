@@ -1,59 +1,13 @@
 import WebSocket, { ServerOptions as WSServerOptions } from 'ws';
 import { v4 } from 'uuid';
-
-type id = string;
-type name = string;
+import { id, name, Request, RPCMessage } from './common';
 
 export interface ServerOptions extends WSServerOptions {
   handshake?: (token: id, ws: DeviceSocket) => Promise<boolean>;
 }
 
-interface RPCMessage {
-  jsonrpc: string;
-  method: string;
-  params: Record<string, any>;
-  id: string;
-  result: any;
-}
-
 export interface DeviceSocket extends WebSocket {
   token: id;
-}
-
-class Request {
-  private server: Server;
-  private timer: number;
-  resolve: Function;
-  reject: Function;
-  private readonly id: string;
-
-  constructor({
-    server,
-    timeout,
-    resolve,
-    reject,
-    id,
-  }: {
-    server: Server;
-    timeout: number;
-    resolve: Function;
-    reject: Function;
-    id: string;
-  }) {
-    this.server = server;
-    this.timer = (setTimeout(
-      this.destructor.bind(this),
-      timeout,
-    ) as any) as number;
-    this.resolve = resolve;
-    this.reject = reject;
-    this.id = id;
-  }
-
-  destructor() {
-    this.server.requests.delete(this.id);
-    this.reject();
-  }
 }
 
 export default class Server extends WebSocket.Server {
@@ -161,7 +115,7 @@ export default class Server extends WebSocket.Server {
         id,
         new Request({
           timeout: 5000,
-          server: this,
+          sender: this,
           resolve,
           reject,
           id,
