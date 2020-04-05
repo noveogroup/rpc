@@ -1,6 +1,15 @@
 import WebSocket, { ServerOptions as WSServerOptions } from 'ws';
+import {
+  getMessageAndType,
+  id,
+  MessageType,
+  name,
+  Request,
+  rpcError,
+  rpcRequest,
+  rpcResponse,
+} from './common';
 import { v4 } from 'uuid';
-import { id, name, Request, RPCMessage } from './common';
 
 export interface ServerOptions extends WSServerOptions {
   handshake?: (token: id, ws: DeviceSocket) => Promise<boolean>;
@@ -15,9 +24,11 @@ export default class Server extends WebSocket.Server {
 
   private methods: Map<name, Function>;
 
-  requests: Map<id, Request>;
+  private requests: Map<id, Request>;
 
-  private readonly handshake: ((token: id, ws: DeviceSocket) => Promise<boolean>) | undefined;
+  private readonly handshake:
+    | ((token: id, ws: DeviceSocket) => Promise<boolean>)
+    | undefined;
 
   constructor(params: ServerOptions) {
     super(params);
@@ -33,99 +44,73 @@ export default class Server extends WebSocket.Server {
         this.emit('rpcClose', ws.token);
       });
       // Message processing
-      ws.on('message', async (string: string) => {
-        const message: RPCMessage = JSON.parse(string);
-        switch (message.method) {
-          case 'connect':
-            {
-              this.devices.set(message.params.id, ws);
-              ws.token = message.params.id;
-              let result = true;
-              if (this.handshake) {
-                result = await this.handshake(message.params.id, ws);
-              }
-              ws.send(
-                JSON.stringify({
-                  jsonrpc: '2.0',
-                  method: 'connect',
-                  params: {
-                    result,
-                  },
-                  id: message.id
-                }),
-              );
-              if (!result) {
-                ws.close();
-              }
+      ws.on('message', async (data: string) => {
+        const [type, message] = getMessageAndType(data);
+        if (!message || type === MessageType.Malformed) {
+          throw new Error(`Malformed message: ${data}`);
+        }
+        switch (type) {
+          case MessageType.Connect:
+            this.devices.set(message.params.id, ws);
+            ws.token = message.params.id;
+            let result = true;
+            if (this.handshake) {
+              result = await this.handshake(message.params.id, ws);
+            }
+            ws.send(rpcRequest('connect', { result }, message.id));
+            if (!result) {
+              ws.close();
             }
             break;
-          default: {
-            // request
-            if (message.method) {
-              try {
-                // @ts-ignore
-                const result = await this.methods
-                  .get(message.method)
-                  .call(this, ws.token, message.params);
-                ws.send(
-                  JSON.stringify({
-                    jsonrpc: '2.0',
-                    result,
-                    id: message.id,
-                  }),
-                );
-              } catch (error) {
-                ws.send(
-                  JSON.stringify({
-                    jsonrpc: '2.0',
-                    error,
-                    id: message.id,
-                  }),
-                );
-              }
-            } else {
-              // response
-              if (!this.requests.has(message.id)) {
-                throw new Error(`Wrong request id: ${message.id}`);
-              }
+          case MessageType.Request:
+            try {
               // @ts-ignore
-              this.requests.get(message.id).resolve(message.result);
+              const result = await this.methods
+                .get(message.method)
+                .call(this, ws.token, message.params);
+              ws.send(rpcResponse(result, message.id));
+            } catch (error) {
+              ws.send(rpcError(error.message, message.id));
             }
-          }
+            break;
+          case MessageType.Response:
+          case MessageType.Error:
+            const request = this.requests.get(message.id);
+            if (!request) {
+              throw new Error(`Wrong request id: ${message.id}`);
+            }
+            if (message.result) {
+              request.resolve(message.result);
+            } else if (message.error) {
+              request.reject(message.error);
+            }
+            break;
         }
       });
     });
   }
 
   async call(token: string, method: string, params: object): Promise<object> {
-    const id = v4();
-    if (!this.devices.has(token)) {
+    const device = this.devices.get(token);
+    if (!device) {
       throw new Error(`Device with token: ${token} doesn't connected`);
     }
-    // @ts-ignore
-    this.devices.get(token).send(
-      JSON.stringify({
-        jsonrpc: '2.0',
-        method,
-        params,
-        id,
-      }),
-    );
+    const id = v4();
     return new Promise((resolve, reject) => {
-      this.requests.set(
-        id,
-        new Request({
-          timeout: 5000,
-          sender: this,
-          resolve,
-          reject,
-          id,
-        }),
-      );
+      const request = new Request({
+        timeout: 5000,
+        resolve,
+        reject,
+        destructor: () => {
+          this.requests.delete(id);
+        },
+      });
+      this.requests.set(id, request);
+      device.send(rpcRequest(method, params, id));
     });
   }
 
-  register(method: string, handler: Function) {
+  register(method: string, handler: (params: any) => Promise<any> | any) {
     this.methods.set(method, handler);
   }
 }
