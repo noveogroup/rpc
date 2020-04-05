@@ -1,4 +1,4 @@
-import { v4 } from 'uuid';
+import { v4 } from 'react-native-uuid';
 import {
   getMessageAndType,
   id,
@@ -28,10 +28,10 @@ export default class Client extends WebSocket {
       this.send(rpcRequest('connect', { id: token }, v4()));
     });
 
-    this.addEventListener('message', async (data: any) => {
-      const [type, message] = getMessageAndType(data);
+    this.addEventListener('message', async (event) => {
+      const [type, message] = getMessageAndType(event.data);
       if (!message || type === MessageType.Malformed) {
-        throw new Error(`Malformed message: ${data}`);
+        throw new Error(`Malformed message: ${event.data}`);
       }
       switch (type) {
         case MessageType.Connect:
