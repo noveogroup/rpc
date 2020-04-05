@@ -1,4 +1,5 @@
 import WebSocket, { ServerOptions as WSServerOptions } from 'ws';
+import { v4 } from 'uuid';
 import {
   getMessageAndType,
   id,
@@ -9,7 +10,6 @@ import {
   rpcRequest,
   rpcResponse,
 } from './common';
-import { v4 } from 'uuid';
 
 export interface ServerOptions extends WSServerOptions {
   handshake?: (token: id, ws: DeviceSocket) => Promise<boolean>;
@@ -51,6 +51,9 @@ export default class Server extends WebSocket.Server {
         }
         switch (type) {
           case MessageType.Connect:
+            if (!message.params.id) {
+              throw new Error(`No connection id presents in ${message.id}`);
+            }
             this.devices.set(message.params.id, ws);
             ws.token = message.params.id;
             let result = true;
@@ -63,11 +66,12 @@ export default class Server extends WebSocket.Server {
             }
             break;
           case MessageType.Request:
+            const method = this.methods.get(message.method);
+            if (!method) {
+              return ws.send(rpcError(`Procedure not found.`, message.id));
+            }
             try {
-              // @ts-ignore
-              const result = await this.methods
-                .get(message.method)
-                .call(this, ws.token, message.params);
+              const result = await method.call(this, message.params);
               ws.send(rpcResponse(result, message.id));
             } catch (error) {
               ws.send(rpcError(error.message, message.id));
@@ -84,6 +88,7 @@ export default class Server extends WebSocket.Server {
             } else if (message.error) {
               request.reject(message.error);
             }
+            this.requests.delete(message.id);
             break;
         }
       });

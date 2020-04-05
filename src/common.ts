@@ -29,11 +29,7 @@ export function getMessageAndType(data: string): [MessageType, RPCMessage?] {
     return [MessageType.Malformed];
   }
   let type: MessageType;
-  if (
-    'method' in message &&
-    message.method === 'connect' &&
-    message.params?.id
-  ) {
+  if ('method' in message && message.method === 'connect') {
     type = MessageType.Connect;
   } else if ('method' in message) {
     type = MessageType.Request;

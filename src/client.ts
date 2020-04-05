@@ -38,11 +38,12 @@ export default class Client extends WebSocket {
           this.handshake(message.params.result);
           break;
         case MessageType.Request:
+          const method = this.methods.get(message.method);
+          if (!method) {
+            return this.send(rpcError(`Procedure not found.`, message.id));
+          }
           try {
-            // @ts-ignore
-            const result = await this.methods
-              .get(message.method)
-              .call(this, message.params);
+            const result = await method.call(this, message.params);
             this.send(rpcResponse(result, message.id));
           } catch (error) {
             this.send(rpcError(error, message.id));
