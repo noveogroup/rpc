@@ -1,13 +1,23 @@
-import { id, name, Request, RPCMessage } from './common';
+import { v4 } from 'uuid';
+import {
+  getMessageAndType,
+  id,
+  MessageType,
+  name,
+  Request,
+  rpcError,
+  rpcRequest,
+  rpcResponse,
+} from './common';
 
 export default class Client extends WebSocket {
   private methods: Map<name, Function>;
 
-  requests: Map<id, Request>;
+  private requests: Map<id, Request>;
 
   handshake: (connected: boolean) => void;
 
-  constructor(cid: id, address: string, protocols?: string | string[]) {
+  constructor(token: id, address: string, protocols?: string | string[]) {
     super(address, protocols);
 
     this.methods = new Map();
@@ -15,79 +25,65 @@ export default class Client extends WebSocket {
     this.handshake = () => {};
 
     this.addEventListener('open', () => {
-      this.send(
-        JSON.stringify({
-          jsonrpc: '2.0',
-          method: 'connect',
-          params: {
-            id: cid,
-          },
-          id: Date.now().toString(),
-        }),
-      );
+      this.send(rpcRequest('connect', { id: token }, v4()));
     });
 
-    this.addEventListener('message', async (string: any) => {
-      const message: RPCMessage = JSON.parse(string.data.toString());
+    this.addEventListener('message', async (data: any) => {
+      const [type, message] = getMessageAndType(data);
+      if (!message || type === MessageType.Malformed) {
+        throw new Error(`Malformed message: ${data}`);
+      }
+      switch (type) {
+        case MessageType.Connect:
+          this.handshake(message.params.result);
+          break;
+        case MessageType.Request:
+          try {
+            // @ts-ignore
+            const result = await this.methods
+              .get(message.method)
+              .call(this, message.params);
+            this.send(rpcResponse(result, message.id));
+          } catch (error) {
+            this.send(rpcError(error, message.id));
+          }
+          break;
+        case MessageType.Response:
+        case MessageType.Error:
+          const request = this.requests.get(message.id);
+          if (!request) {
+            throw new Error(`Wrong request id: ${message.id}`);
+          }
+          if (message.result) {
+            request.resolve(message.result);
+          } else if (message.error) {
+            request.reject(message.error);
+          }
+          this.requests.delete(message.id);
+          break;
+      }
+
       // request
       if (message.method) {
-        if (message.method === 'connect') {
-          this.handshake(message.params.result);
-          return;
-        }
-        try {
-          // @ts-ignore
-          const result = await this.methods
-            .get(message.method)
-            .call(this, message.params);
-          this.send(
-            JSON.stringify({
-              jsonrpc: '2.0',
-              result,
-              id: message.id,
-            }),
-          );
-        } catch (error) {
-          this.send(
-            JSON.stringify({
-              jsonrpc: '2.0',
-              error,
-              id: message.id,
-            }),
-          );
-        }
       } else {
         // response
-        if (!this.requests.has(message.id)) {
-          throw new Error('');
-        }
-        // @ts-ignore
-        this.requests.get(message.id).resolve(message.result);
       }
     });
   }
 
   async call(method: string, params: object): Promise<object> {
-    const id = Date.now().toString();
-    this.send(
-      JSON.stringify({
-        jsonrpc: '2.0',
-        method,
-        params,
-        id,
-      }),
-    );
+    const id = v4();
     return new Promise((resolve, reject) => {
-      this.requests.set(
-        id,
-        new Request({
-          timeout: 5000,
-          sender: this,
-          resolve,
-          reject,
-          id,
-        }),
-      );
+      const request = new Request({
+        timeout: 5000,
+        resolve,
+        reject,
+        destructor: () => {
+          this.requests.delete(id);
+        },
+      });
+      this.requests.set(id, request);
+      this.send(rpcRequest(method, params, id));
     });
   }
 
