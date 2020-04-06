@@ -2,10 +2,9 @@
   "name": "@noveo/dual-rpc-ws",
   "version": "0.0.14",
   "description": "Remote procedure call",
-  "browser": "build/client.js",
-  "main": "build/server.js",
-  "types": "build/server.d.ts",
+  "types": "build/index.d.ts",
   "scripts": {
+    "docs": "typedoc src",
     "test": "tsc --build tsconfig.json && tsc --build tsconfig.client.json && node build/test.js",
     "build": "tsc --build tsconfig.json && tsc --build tsconfig.client.json",
     "prepare": "npm run-script build"
@@ -13,13 +12,17 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@types/react-native-uuid": "^1.4.0",
+    "@types/uuid": "^7.0.0",
     "@types/ws": "^7.2.2",
+    "buffer": "^5.5.0",
+    "react-native-uuid": "^1.4.9",
     "uuid": "^7.0.2",
     "ws": "^7.2.3"
   },
   "devDependencies": {
-    "@types/uuid": "^7.0.0",
     "prettier": "^1.19.1",
+    "typedoc": "^0.17.4",
     "typescript": "^3.8.3"
   }
 }

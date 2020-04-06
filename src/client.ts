@@ -1,9 +1,9 @@
 import { v4 } from 'react-native-uuid';
 import {
   getMessageAndType,
-  id,
+  Id,
   MessageType,
-  name,
+  Name,
   Request,
   rpcError,
   rpcRequest,
@@ -11,13 +11,13 @@ import {
 } from './common';
 
 export default class Client extends WebSocket {
-  private methods: Map<name, Function>;
+  private methods: Map<Name, Function>;
 
-  private requests: Map<id, Request>;
+  private requests: Map<Id, Request>;
 
   handshake: (connected: boolean) => void;
 
-  constructor(token: id, address: string, protocols?: string | string[]) {
+  constructor(token: Id, address: string, protocols?: string | string[]) {
     super(address, protocols);
 
     this.methods = new Map();
@@ -58,7 +58,7 @@ export default class Client extends WebSocket {
           if (message.result) {
             request.resolve(message.result);
           } else if (message.error) {
-            request.reject(message.error);
+            request.reject(new Error(message.error));
           }
           this.requests.delete(message.id);
           break;

@@ -13,7 +13,7 @@ Returns a Promise with the JSON response from the server
 
 ### register(method: string, handler: Function\<Promise\>): void
 Register the method on the client side, handler must return an object or a Promise\<object\> 
-which will be held on the server side 
+which will be held on the server side
 
 ### Events
 
@@ -37,7 +37,10 @@ Returns a Promise with the JSON response from the client
 ### register(method: string, handler: (token: string, params: object) => Promise\<object\>): void
 Register the method on the server side, handler accepts token of the client it was called
 and params as an object and must return an object or a Promise\<object\> 
-which will be held on the client side 
+which will be held on the client side
+
+#### Exception handling for the register method
+You can throw an exception in handler and
 
 ### Events
 
