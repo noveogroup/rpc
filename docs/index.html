@@ -1,0 +1,274 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@noveo/dual-rpc-ws</title>
+	<meta name="description" content="Documentation for @noveo/dual-rpc-ws">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">@noveo/dual-rpc-ws</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>@noveo/dual-rpc-ws</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#dual-rpc-via-websockets" id="dual-rpc-via-websockets" style="color: inherit; text-decoration: none;">
+					<h1>Dual rpc via websockets</h1>
+				</a>
+				<a href="#client-class" id="client-class" style="color: inherit; text-decoration: none;">
+					<h2>Client class</h2>
+				</a>
+				<a href="#constructor-token-string-address-string" id="constructor-token-string-address-string" style="color: inherit; text-decoration: none;">
+					<h3>Constructor (token: string, address: string)</h3>
+				</a>
+				<p>Connect to the server using an address and unique id that concrete the client</p>
+				<a href="#methods" id="methods" style="color: inherit; text-decoration: none;">
+					<h3>Methods</h3>
+				</a>
+				<a href="#callmethod-string-params-objectarray-promiseltobjectgt" id="callmethod-string-params-objectarray-promiseltobjectgt" style="color: inherit; text-decoration: none;">
+					<h3>call(method: string, params?: object|Array): Promise&lt;object&gt;</h3>
+				</a>
+				<p>Call the server method using params as one argument construction.
+				Returns a Promise with the JSON response from the server</p>
+				<a href="#registermethod-string-handler-functionltpromisegt-void" id="registermethod-string-handler-functionltpromisegt-void" style="color: inherit; text-decoration: none;">
+					<h3>register(method: string, handler: Function&lt;Promise&gt;): void</h3>
+				</a>
+				<p>Register the method on the client side, handler must return an object or a Promise&lt;object&gt;
+				which will be held on the server side</p>
+				<a href="#events" id="events" style="color: inherit; text-decoration: none;">
+					<h3>Events</h3>
+				</a>
+				<a href="#handshakeevent-detail-boolean" id="handshakeevent-detail-boolean" style="color: inherit; text-decoration: none;">
+					<h3>handshake(event: {detail: boolean})</h3>
+				</a>
+				<p>In this time we can send messages to the server, the connection is accepted
+				when <code>detail</code> argument is true. Otherwise the connection is aborted</p>
+				<a href="#server-class" id="server-class" style="color: inherit; text-decoration: none;">
+					<h2>Server class</h2>
+				</a>
+				<a href="#constructor-handshake-token-string-ws-devicesocket-gt-promiseltbooleangt-wsserveroptions" id="constructor-handshake-token-string-ws-devicesocket-gt-promiseltbooleangt-wsserveroptions" style="color: inherit; text-decoration: none;">
+					<h3>Constructor ({handshake?: (token: string, ws: DeviceSocket) =&gt; Promise&lt;boolean&gt;, ...ws.ServerOptions})</h3>
+				</a>
+				<p>Setup the server with ws.ServerOptions object.
+					<code>hanshake</code> is the handler for the new connections. It accepts client token, Websocket instance
+					of the new connection and returns <code>true</code>
+				if connection can be established and false to broke the connection</p>
+				<a href="#methods-1" id="methods-1" style="color: inherit; text-decoration: none;">
+					<h3>Methods</h3>
+				</a>
+				<a href="#calltoken-string-method-string-params-objectarray-promiseltobjectgt" id="calltoken-string-method-string-params-objectarray-promiseltobjectgt" style="color: inherit; text-decoration: none;">
+					<h3>call(token: string, method: string, params?: object|Array): Promise&lt;object&gt;</h3>
+				</a>
+				<p>Call the client with the token method using params as one argument construction.
+				Returns a Promise with the JSON response from the client</p>
+				<a href="#registermethod-string-handler-token-string-params-object-gt-promiseltobjectgt-void" id="registermethod-string-handler-token-string-params-object-gt-promiseltobjectgt-void" style="color: inherit; text-decoration: none;">
+					<h3>register(method: string, handler: (token: string, params: object) =&gt; Promise&lt;object&gt;): void</h3>
+				</a>
+				<p>Register the method on the server side, handler accepts token of the client it was called
+					and params as an object and must return an object or a Promise&lt;object&gt;
+				which will be held on the client side</p>
+				<a href="#exception-handling-for-the-register-method" id="exception-handling-for-the-register-method" style="color: inherit; text-decoration: none;">
+					<h4>Exception handling for the register method</h4>
+				</a>
+				<p>You can throw an exception in handler and</p>
+				<a href="#events-1" id="events-1" style="color: inherit; text-decoration: none;">
+					<h3>Events</h3>
+				</a>
+				<a href="#rpcclosetoken-string" id="rpcclosetoken-string" style="color: inherit; text-decoration: none;">
+					<h3>rpcClose(token: string)</h3>
+				</a>
+				<p>Fires when the socket connection closes</p>
+				<a href="#example-of-usage" id="example-of-usage" style="color: inherit; text-decoration: none;">
+					<h3>Example of usage</h3>
+				</a>
+				<p>Client</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> client = <span class="hljs-keyword">new</span> Client(<span class="hljs-string">'id1'</span>, <span class="hljs-string">'ws://localhost:8081'</span>);
+client.addEventListener(<span class="hljs-string">'handshake'</span>, (event) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'We can send messages to the server with this token:'</span>, event.detail);
+    <span class="hljs-keyword">if</span> (event.detail === <span class="hljs-literal">true</span>) {
+        client.call(<span class="hljs-string">'ping'</span>).then(<span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'ping data:'</span>, data)
+        });
+        setInterval(<span class="hljs-keyword">async</span> () =&gt; {
+            <span class="hljs-keyword">try</span> {
+                <span class="hljs-keyword">const</span> a = <span class="hljs-keyword">await</span> client.call(<span class="hljs-string">'hi'</span>, { <span class="hljs-attr">a</span>: <span class="hljs-number">2</span> });
+                <span class="hljs-built_in">console</span>.log(a);
+            } <span class="hljs-keyword">catch</span> (e) {}
+        }, <span class="hljs-number">20000</span>);
+    }
+});
+client.register(<span class="hljs-string">'hi'</span>, (params) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'client hi'</span>, params);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">`hello, <span class="hljs-subst">${params.b}</span>`</span>);
+});</code></pre>
+				<p>Server</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> Server <span class="hljs-keyword">from</span> <span class="hljs-string">'@noveo/dual-rpc-ws'</span>;
+
+<span class="hljs-keyword">const</span> server = <span class="hljs-keyword">new</span> Server({
+  port: <span class="hljs-number">8081</span>,
+  handshake: <span class="hljs-keyword">async</span> (id) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'connected'</span>, id);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-literal">true</span>);
+  },
+});
+
+server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-function">(<span class="hljs-params">token: <span class="hljs-built_in">string</span>, params: <span class="hljs-built_in">any</span></span>) =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'server hi'</span>, params);
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">`<span class="hljs-subst">${token}</span>, hello, <span class="hljs-subst">${params.a}</span>`</span>);
+});
+
+setInterval(<span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-keyword">await</span> server.call(<span class="hljs-string">'id1'</span>, <span class="hljs-string">'hi'</span>, { b: <span class="hljs-number">2</span> });
+    <span class="hljs-built_in">console</span>.log(a);
+  } <span class="hljs-keyword">catch</span> (e) {}
+}, <span class="hljs-number">20000</span>);</code></pre>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-enum">
+						<a href="enums/messagetype.html" class="tsd-kind-icon">Message<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/client.html" class="tsd-kind-icon">Client</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/request.html" class="tsd-kind-icon">Request</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/server.html" class="tsd-kind-icon">Server</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/devicesocket.html" class="tsd-kind-icon">Device<wbr>Socket</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/rpccontext.html" class="tsd-kind-icon">RPCContext</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/rpcmessage.html" class="tsd-kind-icon">RPCMessage</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/serveroptions.html" class="tsd-kind-icon">Server<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#id" class="tsd-kind-icon">id</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#name" class="tsd-kind-icon">name</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="globals.html#ws" class="tsd-kind-icon">ws</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#getmessageandtype" class="tsd-kind-icon">get<wbr>Message<wbr>And<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#rpcerror" class="tsd-kind-icon">rpc<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#rpcrequest" class="tsd-kind-icon">rpc<wbr>Request</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#rpcresponse" class="tsd-kind-icon">rpc<wbr>Response</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>
