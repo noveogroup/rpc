@@ -50,8 +50,9 @@ export interface ClientSocket extends WebSocket {
 /**
  * Websocket server class which accepts the connection from the clients,
  * checks their tokens. It can {@link Server.register|register} any method
- * to call by the client.
+ * to call it by the client.
  * And also can {@link Server.call|call} any method on the client by its token
+ * and receive response data.
  *
  * The main parts of this class are:
  * - {@link ServerOptions.handshake|handshake} handler for the constructor
@@ -193,15 +194,15 @@ export default class Server extends WebSocket.Server {
    * Call the client's method by the token and method name using params as one
    * argument construction.
    *
-   * Returns a Promise with the JSON response from the client. It can be an
+   * @return Returns a Promise with the JSON response from the client. It can be an
    * object, an array or a primitive.
    * @param token Unique token of the client
    * @param method The name of the remote method to call
    * @param params Method arguments
    * @throws one of these errors:
    * - When the client with token doesn't connected
-   * - When the method doesn't present on the other side
-   * - When the method call on the other side triggered an exception
+   * - When the method doesn't present on the client side
+   * - When the method call on the client side triggered an exception
    */
   async call(
     token: Id,
