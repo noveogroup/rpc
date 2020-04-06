@@ -32,7 +32,7 @@ export interface ServerOptions extends WSServerOptions {
    * }
    * ```
    */
-  handshake?: (token: Id, ws: DeviceSocket) => Promise<boolean> | boolean;
+  handshake?: (token: Id, ws: ClientSocket) => Promise<boolean> | boolean;
   /**
    * Function
    * @param ctx
@@ -40,7 +40,10 @@ export interface ServerOptions extends WSServerOptions {
   prepareContext?: (ctx: RPCContext) => any;
 }
 
-export interface DeviceSocket extends WebSocket {
+export interface ClientSocket extends WebSocket {
+  /**
+   * Unique token id of the client
+   */
   token: Id;
 }
 
@@ -85,7 +88,7 @@ export default class Server extends WebSocket.Server {
 
   private readonly handshake: (
     token: Id,
-    ws: DeviceSocket,
+    ws: ClientSocket,
   ) => Promise<boolean> | boolean = (_) => Promise.resolve(true);
 
   private readonly prepareContext: (ctx: RPCContext) => any = (ctx) => ctx;
@@ -94,7 +97,7 @@ export default class Server extends WebSocket.Server {
    * Setup the server with ws.ServerOptions object.
    *
    * {@link ServerOptions.handshake} is the handler for the new connections.
-   * It accepts client token, {@link DeviceSocket} instance
+   * It accepts client token, {@link ClientSocket} instance
    * of the new connection and returns `true`
    * if the connection can be established and `false` to broke the connection.
    * If you don't pass the `handshake` property, server will accept every client.
@@ -110,7 +113,7 @@ export default class Server extends WebSocket.Server {
     if (params.prepareContext) {
       this.prepareContext = params.prepareContext;
     }
-    this.on('connection', (ws: DeviceSocket) => {
+    this.on('connection', (ws: ClientSocket) => {
       // Event on removing the client
       ws.on('close', () => {
         this.devices.delete(ws.token);
@@ -179,7 +182,7 @@ export default class Server extends WebSocket.Server {
    * @event rpcClose
    * @example
    * ```typescript
-   * rpc.on('rpcClose', (token) => console.log(`Client disconnected ${token}));
+   * rpc.on('rpcClose', (token) => console.log(`Client disconnected ${token}`));
    * ```
    */
   rpcClose(token: Id) {
