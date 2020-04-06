@@ -178,3 +178,6 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 docs
+*.js
+*.d.ts
+*.js.map
