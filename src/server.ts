@@ -6,6 +6,7 @@ import {
   MessageType,
   name,
   Request,
+  RPCContext,
   rpcError,
   rpcRequest,
   rpcResponse,
@@ -13,6 +14,7 @@ import {
 
 export interface ServerOptions extends WSServerOptions {
   handshake?: (token: id, ws: DeviceSocket) => Promise<boolean>;
+  prepareContext?: (ctx: RPCContext) => any;
 }
 
 export interface DeviceSocket extends WebSocket {
@@ -22,21 +24,28 @@ export interface DeviceSocket extends WebSocket {
 export default class Server extends WebSocket.Server {
   private devices: Map<id, WebSocket>;
 
-  private methods: Map<name, Function>;
+  private methods: Map<name, (ctx: RPCContext, params: any) => Promise<any>>;
 
   private requests: Map<id, Request>;
 
-  private readonly handshake:
-    | ((token: id, ws: DeviceSocket) => Promise<boolean>)
-    | undefined;
+  private readonly handshake: (
+    token: id,
+    ws: DeviceSocket,
+  ) => Promise<boolean> = (_) => Promise.resolve(true);
+
+  private readonly prepareContext: (ctx: RPCContext) => any = (ctx) => ctx;
 
   constructor(params: ServerOptions) {
     super(params);
     this.devices = new Map();
     this.methods = new Map();
     this.requests = new Map();
-    this.handshake = params.handshake;
-
+    if (params.handshake) {
+      this.handshake = params.handshake;
+    }
+    if (params.prepareContext) {
+      this.prepareContext = params.prepareContext;
+    }
     this.on('connection', (ws: DeviceSocket) => {
       // Event on removing the client
       ws.on('close', () => {
@@ -56,10 +65,7 @@ export default class Server extends WebSocket.Server {
             }
             this.devices.set(message.params.id, ws);
             ws.token = message.params.id;
-            let result = true;
-            if (this.handshake) {
-              result = await this.handshake(message.params.id, ws);
-            }
+            let result = await this.handshake(message.params.id, ws);
             ws.send(rpcRequest('connect', { result }, message.id));
             if (!result) {
               ws.close();
@@ -71,7 +77,14 @@ export default class Server extends WebSocket.Server {
               return ws.send(rpcError(`Procedure not found.`, message.id));
             }
             try {
-              const result = await method.call(this, message.params);
+              const result = await method.call(
+                this,
+                this.prepareContext({
+                  id: message.id,
+                  token: ws.token,
+                }),
+                message.params,
+              );
               ws.send(rpcResponse(result, message.id));
             } catch (error) {
               ws.send(rpcError(error.message, message.id));
@@ -115,7 +128,10 @@ export default class Server extends WebSocket.Server {
     });
   }
 
-  register(method: string, handler: (params: any) => Promise<any> | any) {
+  register(
+    method: string,
+    handler: (ctx: RPCContext, params: any) => Promise<any> | any,
+  ) {
     this.methods.set(method, handler);
   }
 }

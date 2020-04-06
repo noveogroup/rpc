@@ -10,6 +10,11 @@ export interface RPCMessage {
   error: any;
 }
 
+export interface RPCContext {
+  id: id;
+  token: id;
+}
+
 export enum MessageType {
   Connect,
   Request,

@@ -63,12 +63,6 @@ export default class Client extends WebSocket {
           this.requests.delete(message.id);
           break;
       }
-
-      // request
-      if (message.method) {
-      } else {
-        // response
-      }
     });
   }
 
