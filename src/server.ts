@@ -113,6 +113,9 @@ export default class Server extends WebSocket.Server {
    * of the new connection and returns `true`
    * if the connection can be established and `false` to broke the connection.
    * If you don't pass the `handshake` property, server will accept every client.
+   * @param params An object which passed out to define all the main properties
+   * of the server. Notable fields are: {@link ServerOptions.port},
+   * {@link ServerOptions.handshake} and {@link ServerOptions.prepareContext}.
    */
   constructor(params: ServerOptions) {
     super(params);
