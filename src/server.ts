@@ -36,7 +36,8 @@ export interface ServerOptions extends WSServerOptions {
   /**
    * Optional function to define initial context for the {@link Server.register}
    * handlers. By default it returns the {@link RPCContext} object
-   * @param ctx An object with the `token` and `id` properties
+   * @param ctx An object with the `token` and `id` properties. Where `id` - is
+   * a unique method call identifier
    * @example
    * ```typescript
    * const server = new Server({

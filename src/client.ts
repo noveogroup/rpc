@@ -5,10 +5,49 @@ import {
   MessageType,
   Name,
   Request,
+  RPCContext,
   rpcError,
   rpcRequest,
   rpcResponse,
 } from './common';
+
+export interface ClientOptions {
+  /**
+   * Unique id for the client
+   */
+  token: Id;
+  /**
+   * Server's address ex. `wss://192.168.1.1/ws`
+   */
+  address: string;
+  /**
+   * The function that will be called when the connection is established
+   * @param result The result of the handshaking. If true - everything is ok.
+   * Otherwise - server doesn't allow connection and the websocket is closed
+   */
+  handshake?: (result: boolean) => void;
+  /**
+   * Optional function to define initial context for the {@link Client.register}
+   * handlers. By default it returns the {@link RPCContext} object
+   * @param ctx An object with the `id` property. Where `id` - is a unique
+   * method call identifier
+   * @example
+   * ```typescript
+   * const server = new Server({
+   *   ...
+   *   prepareContext: (ctx) => ({ ...ctx, useWS: true }),
+   * });
+   * server.register('ping', (ctx, params) => {
+   *   console.log(ctx.id, 'server ping from', ctx.token, params, ctx.useWS);
+   * });
+   * ```
+   */
+  prepareContext?: (ctx: RPCContext) => any;
+  /**
+   * Set of protocols inherited from {@link WebSocket.constructor}
+   */
+  protocols?: string | string[];
+}
 
 /**
  * RPC websocket client class which establishes the connection to the server.
@@ -42,27 +81,35 @@ import {
  * ```
  */
 export default class Client extends WebSocket {
-  private methods: Map<Name, Function>;
+  private methods: Map<Name, (params: any, ctx: RPCContext) => Promise<any>>;
 
   private requests: Map<Id, Request>;
 
   handshake: (connected: boolean) => void;
 
+  private readonly prepareContext: (ctx: RPCContext) => any = (ctx) => ctx;
+
   /**
-   * Connect to the server using an address and unique id that concretize the client
-   * @param token Unique id of the client
-   * @param address Server's address ex. `wss://192.168.1.1/ws`
-   * @param protocols
+   * Connect to the server using an address and unique id that specifies the client
+   * @param params An object which passed out to define all the main properties
+   * of the server. Notable fields are: {@link Client.address},
+   * {@link Client.handshake} and {@link Client.prepareContext}.
    */
-  constructor(token: Id, address: string, protocols?: string | string[]) {
-    super(address, protocols);
+  constructor(params: ClientOptions) {
+    super(params.address, params.protocols);
 
     this.methods = new Map();
     this.requests = new Map();
     this.handshake = () => {};
+    if (params.handshake) {
+      this.handshake = params.handshake;
+    }
+    if (params.prepareContext) {
+      this.prepareContext = params.prepareContext;
+    }
 
     this.addEventListener('open', () => {
-      this.send(rpcRequest('connect', { id: token }, v4()));
+      this.send(rpcRequest('connect', { id: params.token }, v4()));
     });
 
     this.addEventListener('message', async (event) => {
@@ -80,7 +127,11 @@ export default class Client extends WebSocket {
             return this.send(rpcError(`Procedure not found.`, message.id));
           }
           try {
-            const result = await method.call(this, message.params);
+            const result = await method.call(
+              this,
+              message.params,
+              this.prepareContext({ id: message.id }),
+            );
             this.send(rpcResponse(result, message.id));
           } catch (error) {
             this.send(rpcError(error.message, message.id));
@@ -157,7 +208,10 @@ export default class Client extends WebSocket {
    * @param method
    * @param handler
    */
-  register(method: string, handler: Function) {
+  register(
+    method: string,
+    handler: (params: any, ctx: RPCContext) => Promise<any>,
+  ) {
     this.methods.set(method, handler);
   }
 }
