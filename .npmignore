@@ -9,3 +9,4 @@ typedoc.json
 .eslintrc.js
 docs
 noveo*.tgz
+build/test*
