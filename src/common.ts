@@ -46,7 +46,7 @@ export interface RPCMessage {
 export interface RPCContext {
   [x: string]: any;
   id: Id;
-  token: Id;
+  token?: Id;
 }
 
 /**
