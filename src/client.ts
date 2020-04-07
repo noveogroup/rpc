@@ -92,8 +92,8 @@ export default class Client extends WebSocket {
   /**
    * Connect to the server using an address and unique id that specifies the client
    * @param params An object which passed out to define all the main properties
-   * of the server. Notable fields are: {@link Client.address},
-   * {@link Client.handshake} and {@link Client.prepareContext}.
+   * of the server. Notable fields are: {@link ClientOptions.address},
+   * {@link ClientOptions.handshake} and {@link ClientOptions.prepareContext}.
    */
   constructor(params: ClientOptions) {
     super(params.address, params.protocols);
