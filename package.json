@@ -1,12 +1,12 @@
 {
   "name": "@noveo/dual-rpc-ws",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Remote procedure call",
   "types": "build/index.d.ts",
   "main": "build/index.js",
   "scripts": {
     "docs": "typedoc src",
-    "test": "tsc --build tsconfig.json && tsc --build tsconfig.client.json && node build/test.js",
+    "test": "npm run build && node build/test.js",
     "build": "tsc --build tsconfig.json && tsc --build tsconfig.client.json",
     "prepare": "npm run-script build"
   },
