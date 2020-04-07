@@ -1,3 +1,10 @@
-.idea/
-node_modules/
-src/
+.idea
+node_modules
+src
+tsconfig.client.json
+tsconfig.json
+typedoc.json
+.prettierignore
+.prettierrc
+.eslintrc.js
+docs
