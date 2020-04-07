@@ -8,3 +8,4 @@ typedoc.json
 .prettierrc
 .eslintrc.js
 docs
+noveo*.tgz
