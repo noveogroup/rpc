@@ -44,6 +44,7 @@ export interface RPCMessage {
  * A default context object. Every local RPC call have an object
  */
 export interface RPCContext {
+  [x: string]: any;
   id: Id;
   token: Id;
 }

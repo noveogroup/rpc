@@ -34,8 +34,19 @@ export interface ServerOptions extends WSServerOptions {
    */
   handshake?: (token: Id, ws: ClientSocket) => Promise<boolean> | boolean;
   /**
-   * Function
-   * @param ctx
+   * Optional function to define initial context for the {@link Server.register}
+   * handlers. By default it returns the {@link RPCContext} object
+   * @param ctx An object with the `token` and `id` properties
+   * @example
+   * ```typescript
+   * const server = new Server({
+   *   ...
+   *   prepareContext: (ctx) => ({ ...ctx, useWS: true }),
+   * });
+   * server.register('ping', (ctx, params) => {
+   *   console.log(ctx.id, 'server ping from', ctx.token, params, ctx.useWS);
+   * });
+   * ```
    */
   prepareContext?: (ctx: RPCContext) => any;
 }
