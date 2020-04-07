@@ -21,3 +21,20 @@ ws.register('ping', (ctx, params) => {
 ws.register('exception', () => {
   throw new Error('server exception');
 });
+
+ws.register('run', async () => {
+  console.log(await ws.call('id13', 'ping', {}));
+  console.log(await ws.call('id13', 'ping', { a: 1 }));
+  console.log(await ws.call('id13', 'ping'));
+  console.log(await ws.call('id13', 'ping', undefined));
+  try {
+    console.log(await ws.call('id13', 'exception', { a: 1 }));
+  } catch (e) {
+    console.error('error', e.message);
+  }
+  try {
+    console.log(await ws.call('id13', 'nonexists', { a: 1 }));
+  } catch (e) {
+    console.error('error', e.message);
+  }
+});

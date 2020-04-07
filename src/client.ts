@@ -83,7 +83,7 @@ export default class Client extends WebSocket {
             const result = await method.call(this, message.params);
             this.send(rpcResponse(result, message.id));
           } catch (error) {
-            this.send(rpcError(error, message.id));
+            this.send(rpcError(error.message, message.id));
           }
           break;
         case MessageType.Response:
@@ -92,9 +92,9 @@ export default class Client extends WebSocket {
           if (!request) {
             throw new Error(`Wrong request id: ${message.id}`);
           }
-          if (message.result) {
+          if (typeof message.result !== undefined) {
             request.resolve(message.result);
-          } else if (message.error) {
+          } else if (typeof message.error !== undefined) {
             request.reject(new Error(message.error));
           }
           this.requests.delete(message.id);
@@ -115,7 +115,7 @@ export default class Client extends WebSocket {
    */
   async call(
     method: string,
-    params: object,
+    params?: Record<string, any>,
   ): Promise<object | [] | string | number | boolean | null> {
     const id = v4();
     return new Promise((resolve, reject) => {
@@ -128,7 +128,7 @@ export default class Client extends WebSocket {
         },
       });
       this.requests.set(id, request);
-      this.send(rpcRequest(method, params, id));
+      this.send(rpcRequest(method, params ?? null, id));
     });
   }
 

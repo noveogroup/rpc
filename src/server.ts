@@ -178,9 +178,9 @@ export default class Server extends WebSocket.Server {
             if (!request) {
               throw new Error(`Wrong request id: ${message.id}`);
             }
-            if (message.result) {
+            if (typeof message.result !== undefined) {
               request.resolve(message.result);
-            } else if (message.error) {
+            } else if (typeof message.error !== undefined) {
               request.reject(new Error(message.error));
             }
             this.requests.delete(message.id);
@@ -221,7 +221,7 @@ export default class Server extends WebSocket.Server {
   async call(
     token: Id,
     method: Name,
-    params: Record<string, any>,
+    params?: Record<string, any>,
   ): Promise<object | [] | string | number | boolean | null> {
     const device = this.devices.get(token);
     if (!device) {
@@ -238,7 +238,7 @@ export default class Server extends WebSocket.Server {
         },
       });
       this.requests.set(id, request);
-      device.send(rpcRequest(method, params, id));
+      device.send(rpcRequest(method, params ?? null, id));
     });
   }
 

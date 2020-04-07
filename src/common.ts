@@ -147,7 +147,14 @@ export function rpcRequest(method: Name, params: any, id: Id): string {
   });
 }
 
-export function rpcResponse(result: any, id: Id): string {
+export function rpcResponse(result: any = null, id: Id): string {
+  console.log(
+    JSON.stringify({
+      jsonrpc: '2.0',
+      result,
+      id,
+    }),
+  );
   return JSON.stringify({
     jsonrpc: '2.0',
     result,
