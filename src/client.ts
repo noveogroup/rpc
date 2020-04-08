@@ -150,9 +150,9 @@ export default class Client extends WebSocket {
           if (!request) {
             throw new Error(`Wrong request id: ${message.id}`);
           }
-          if (typeof message.result !== undefined) {
+          if (typeof message.result !== 'undefined') {
             request.resolve(message.result);
-          } else if (typeof message.error !== undefined) {
+          } else if (typeof message.error !== 'undefined') {
             request.reject(new Error(message.error));
           }
           this.requests.delete(message.id);
