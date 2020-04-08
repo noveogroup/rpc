@@ -34,12 +34,12 @@ export interface ClientOptions {
    * method call identifier
    * @example
    * ```typescript
-   * const server = new Server({
+   * const client = new Client({
    *   ...
    *   prepareContext: (ctx) => ({ ...ctx, useWS: true }),
    * });
-   * server.register('ping', (ctx, params) => {
-   *   console.log(ctx.id, 'server ping from', ctx.token, params, ctx.useWS);
+   * client.register('ping', (params, context) => {
+   *   console.log(context.id, 'client ping', params, ctx.useWS);
    * });
    * ```
    */
@@ -67,13 +67,16 @@ export interface ClientOptions {
  * @example
  * ```typescript
  * import Client from '@noveo/dual-rpc-ws/client';
- * const client = new Client('id13', 'ws://192.168.0.80:8080');
- * client.handshake = (connected) => {
- *   console.log('connected', connected);
- *   this.call(token, 'hi', {message: 'hello from client'});
- * };
- * client.register('hi', (token, params) => {
- *   console.log('client hi', params);
+ * const client = new Client({
+ *   token: 'id13',
+ *   address: 'ws://192.168.0.80:8080',
+ *   handshake: (connected) => {
+ *     console.log('connected', connected);
+ *     this.call(token, 'hi', {message: 'hello from client'});
+ *   }
+ * });
+ * client.register('hi', (params, context) => {
+ *   console.log('client hi, call id:', context.id);
  *   return Promise.resolve(`${token}, hello`);
  * });
  * client.addEventListener('close', () => {
