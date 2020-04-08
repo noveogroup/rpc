@@ -270,6 +270,11 @@ export default class Server extends WebSocket.Server {
    * ws.call('exception', {})
    *   .catch((e) => console.log(e.message)); // prints "server exception"
    * ```
+   *
+   * If the function does not return a value, a value of `null` will be obtained
+   * on the client side. Because there is no `undefined` value in the JSON
+   * representation.
+   *
    * @param method Method name
    * @param handler Handler with context and params arguments
    */
