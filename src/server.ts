@@ -101,7 +101,7 @@ export default class Server extends WebSocket.Server {
     (
       ctx: RPCContext,
       params: Record<string, any>,
-    ) => Promise<JSONValue> | JSONValue
+    ) => Promise<JSONValue> | JSONValue | undefined
   >;
 
   private requests: Map<Id, Request>;
@@ -290,7 +290,7 @@ export default class Server extends WebSocket.Server {
     handler: (
       ctx: RPCContext,
       params: Record<string, any>,
-    ) => Promise<JSONValue> | JSONValue,
+    ) => Promise<JSONValue> | JSONValue | undefined,
   ) {
     this.methods.set(method, handler);
   }
