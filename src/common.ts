@@ -8,6 +8,11 @@ export type Id = string;
 export type Name = string;
 
 /**
+ * Primitives that can be represented in the JSON structure
+ */
+export type JSONValue = object | [] | string | number | boolean | null;
+
+/**
  * Common structure of the JSON-RPC 2.0 message
  * @internal
  */

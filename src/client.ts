@@ -2,6 +2,7 @@ import { v4 } from 'react-native-uuid';
 import {
   getMessageAndType,
   Id,
+  JSONValue,
   MessageType,
   Name,
   Request,
@@ -81,7 +82,13 @@ export interface ClientOptions {
  * ```
  */
 export default class Client extends WebSocket {
-  private methods: Map<Name, (params: any, ctx: RPCContext) => Promise<any>>;
+  private methods: Map<
+    Name,
+    (
+      params: Record<string, any>,
+      ctx: RPCContext,
+    ) => Promise<JSONValue> | JSONValue
+  >;
 
   private requests: Map<Id, Request>;
 
@@ -215,7 +222,10 @@ export default class Client extends WebSocket {
    */
   register(
     method: string,
-    handler: (params: any, ctx: RPCContext) => Promise<any>,
+    handler: (
+      params: Record<string, any>,
+      ctx: RPCContext,
+    ) => Promise<JSONValue> | JSONValue,
   ) {
     this.methods.set(method, handler);
   }

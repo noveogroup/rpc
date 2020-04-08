@@ -3,6 +3,7 @@ import { v4 } from 'uuid';
 import {
   getMessageAndType,
   Id,
+  JSONValue,
   MessageType,
   Name,
   Request,
@@ -95,7 +96,13 @@ export interface ClientSocket extends WebSocket {
 export default class Server extends WebSocket.Server {
   private devices: Map<Id, WebSocket>;
 
-  private methods: Map<Name, (ctx: RPCContext, params: any) => Promise<any>>;
+  private methods: Map<
+    Name,
+    (
+      ctx: RPCContext,
+      params: Record<string, any>,
+    ) => Promise<JSONValue> | JSONValue
+  >;
 
   private requests: Map<Id, Request>;
 
@@ -223,7 +230,7 @@ export default class Server extends WebSocket.Server {
     token: Id,
     method: Name,
     params?: Record<string, any>,
-  ): Promise<object | [] | string | number | boolean | null> {
+  ): Promise<JSONValue> {
     const device = this.devices.get(token);
     if (!device) {
       throw new Error(`Client with token: ${token} doesn't connected`);
@@ -280,7 +287,10 @@ export default class Server extends WebSocket.Server {
    */
   register(
     method: string,
-    handler: (ctx: RPCContext, params: any) => Promise<any> | any,
+    handler: (
+      ctx: RPCContext,
+      params: Record<string, any>,
+    ) => Promise<JSONValue> | JSONValue,
   ) {
     this.methods.set(method, handler);
   }
