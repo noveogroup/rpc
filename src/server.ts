@@ -16,7 +16,7 @@ import {
 /**
  * Current dual-ws-rpc server statistics
  */
-export interface ServerStat {
+export interface ServerStats {
   /**
    * An array of all connected tokens
    */
@@ -315,7 +315,7 @@ export default class Server extends WebSocket.Server {
     this.methods.set(method, handler);
   }
 
-  get stats(): ServerStat {
+  get stats(): ServerStats {
     return {
       connections: [...this.devices.keys()],
       requestsInProgress: this.requests.size,
