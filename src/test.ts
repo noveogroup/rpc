@@ -18,7 +18,10 @@ ws.register('ping', (ctx, params) => {
   return Promise.resolve({ server: 'pong' });
 });
 
-ws.register('exception', () => {
+ws.register('exception', async () => {
+  console.log(1);
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  console.log(2);
   throw new Error('server exception');
 });
 
@@ -38,3 +41,5 @@ ws.register('run', async () => {
     console.error('error', e.message);
   }
 });
+
+setInterval(() => console.log(ws.stats), 3000);

@@ -13,6 +13,24 @@ import {
   rpcResponse,
 } from './common';
 
+/**
+ * Current dual-ws-rpc server statistics
+ */
+export interface ServerStat {
+  /**
+   * An array of all connected tokens
+   */
+  connections: Id[];
+  /**
+   * Number of processing remote procedures calls
+   */
+  requestsInProgress: number;
+  /**
+   * Number of processing calls from clients
+   */
+  responseInProgress: number;
+}
+
 export interface ServerOptions extends WSServerOptions {
   /**
    * An asynchronous function which handles every new connection.
@@ -113,6 +131,8 @@ export default class Server extends WebSocket.Server {
 
   private readonly prepareContext: (ctx: RPCContext) => any = (ctx) => ctx;
 
+  private responseInProgress: number = 0;
+
   /**
    * Setup the server with ws.ServerOptions object.
    *
@@ -166,6 +186,7 @@ export default class Server extends WebSocket.Server {
               return ws.send(rpcError(`Procedure not found.`, message.id));
             }
             try {
+              this.responseInProgress += 1;
               const result = await method.call(
                 this,
                 this.prepareContext({
@@ -177,6 +198,8 @@ export default class Server extends WebSocket.Server {
               ws.send(rpcResponse(result, message.id));
             } catch (error) {
               ws.send(rpcError(error.message, message.id));
+            } finally {
+              this.responseInProgress -= 1;
             }
             break;
           case MessageType.Response:
@@ -290,5 +313,13 @@ export default class Server extends WebSocket.Server {
     ) => Promise<JSONValue> | JSONValue | undefined,
   ) {
     this.methods.set(method, handler);
+  }
+
+  get stats(): ServerStat {
+    return {
+      connections: [...this.devices.keys()],
+      requestsInProgress: this.requests.size,
+      responseInProgress: this.responseInProgress,
+    };
   }
 }
