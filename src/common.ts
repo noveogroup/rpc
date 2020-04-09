@@ -12,67 +12,76 @@ export type Name = string;
  */
 export type JSONValue = object | [] | string | number | boolean | null;
 
-interface RPCConnect {
-  type: MessageType.Connect;
-  jsonrpc: '2.0';
-  id: Id;
-  method: 'connect';
-  params: {
-    id?: Id;
-    result?: boolean;
-  };
-}
+namespace RPCMessages {
+  /**
+   * Special request for establishing the connection
+   */
+  export interface RPCConnect {
+    type: MessageType.Connect;
+    jsonrpc: '2.0';
+    id: Id;
+    method: 'connect';
+    params: {
+      id?: Id;
+      result?: boolean;
+    };
+  }
 
-/**
- * An error, if the sender rpc-call ended unexpectedly
- */
-interface RPCError {
-  type: MessageType.Error;
-  jsonrpc: '2.0';
-  id: Id;
-  error: string;
-}
+  /**
+   * An error, if the sender rpc-call ended unexpectedly
+   * @internal
+   */
+  export interface RPCError {
+    type: MessageType.Error;
+    jsonrpc: '2.0';
+    id: Id;
+    error: string;
+  }
 
-/**
- * Malformed message
- */
-interface RPCMalformed {
-  type: MessageType.Malformed;
-}
+  /**
+   * Malformed message
+   * @internal
+   */
+  export interface RPCMalformed {
+    type: MessageType.Malformed;
+  }
 
-/**
- * Method params. Library supports only one argument for the method and it
- * must be an object (record with the different type which can be described
- * by the json object)
- */
-interface RPCRequest {
-  type: MessageType.Request;
-  jsonrpc: '2.0';
-  id: Id;
-  method: Name;
-  params: Record<string, any>;
-}
+  /**
+   * Method params. Library supports only one argument for the method and it
+   * must be an object (record with the different type which can be described
+   * by the json object)
+   * @internal
+   */
+  export interface RPCRequest {
+    type: MessageType.Request;
+    jsonrpc: '2.0';
+    id: Id;
+    method: Name;
+    params: Record<string, any>;
+  }
 
-/**
- * Result of the method execution. And json type
- */
-interface RPCResponse {
-  type: MessageType.Response;
-  jsonrpc: '2.0';
-  id: Id;
-  result: JSONValue;
-}
+  /**
+   * Result of the method execution. And json type
+   * @internal
+   */
+  export interface RPCResponse {
+    type: MessageType.Response;
+    jsonrpc: '2.0';
+    id: Id;
+    result: JSONValue;
+  }
 
-/**
- * Common structure of the JSON-RPC 2.0 message
- * @internal
- */
-type RPCMessageType =
-  | RPCConnect
-  | RPCError
-  | RPCMalformed
-  | RPCRequest
-  | RPCResponse;
+  /**
+   * Common structure of the JSON-RPC 2.0 message
+   * @internal
+   */
+  export type RPCMessageType =
+    | RPCMessages.RPCConnect
+    | RPCMessages.RPCError
+    | RPCMessages.RPCMalformed
+    | RPCMessages.RPCRequest
+    | RPCMessages.RPCResponse;
+}
 
 /**
  * A default context object. Every local RPC call have an object
@@ -118,7 +127,7 @@ export enum MessageType {
  * Returns the message from the received websocket data
  * @internal
  */
-export function getMessage(data: string): RPCMessageType {
+export function getMessage(data: string): RPCMessages.RPCMessageType {
   let message: any;
   try {
     message = JSON.parse(data);
@@ -191,34 +200,36 @@ export class Request {
   }
 }
 
-export function rpcRequest(method: Name, params: any, id: Id): string {
-  return JSON.stringify({
-    jsonrpc: '2.0',
-    method,
-    params,
-    id,
-  });
-}
+export namespace RPCHelpers {
+  export function rpcRequest(method: Name, params: any, id: Id): string {
+    return JSON.stringify({
+      jsonrpc: '2.0',
+      method,
+      params,
+      id,
+    });
+  }
 
-export function rpcResponse(result: any = null, id: Id): string {
-  console.log(
-    JSON.stringify({
+  export function rpcResponse(result: any = null, id: Id): string {
+    console.log(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        result,
+        id,
+      }),
+    );
+    return JSON.stringify({
       jsonrpc: '2.0',
       result,
       id,
-    }),
-  );
-  return JSON.stringify({
-    jsonrpc: '2.0',
-    result,
-    id,
-  });
-}
+    });
+  }
 
-export function rpcError(error: any, id: Id): string {
-  return JSON.stringify({
-    jsonrpc: '2.0',
-    error,
-    id,
-  });
+  export function rpcError(error: any, id: Id): string {
+    return JSON.stringify({
+      jsonrpc: '2.0',
+      error,
+      id,
+    });
+  }
 }

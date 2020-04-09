@@ -8,9 +8,7 @@ import {
   Name,
   Request,
   RPCContext,
-  rpcError,
-  rpcRequest,
-  rpcResponse,
+  RPCHelpers,
 } from './common';
 
 /**
@@ -175,7 +173,7 @@ export default class Server extends WebSocket.Server {
             this.devices.set(message.params.id, ws);
             ws.token = message.params.id;
             let result = await this.handshake(message.params.id, ws);
-            ws.send(rpcRequest('connect', { result }, message.id));
+            ws.send(RPCHelpers.rpcRequest('connect', { result }, message.id));
             if (!result) {
               ws.close();
             }
@@ -183,7 +181,9 @@ export default class Server extends WebSocket.Server {
           case MessageType.Request:
             const method = this.methods.get(message.method);
             if (!method) {
-              return ws.send(rpcError(`Procedure not found.`, message.id));
+              return ws.send(
+                RPCHelpers.rpcError(`Procedure not found.`, message.id),
+              );
             }
             try {
               this.responseInProgress += 1;
@@ -195,9 +195,9 @@ export default class Server extends WebSocket.Server {
                 }),
                 message.params,
               );
-              ws.send(rpcResponse(result, message.id));
+              ws.send(RPCHelpers.rpcResponse(result, message.id));
             } catch (error) {
-              ws.send(rpcError(error.message, message.id));
+              ws.send(RPCHelpers.rpcError(error.message, message.id));
             } finally {
               this.responseInProgress -= 1;
             }
@@ -266,7 +266,7 @@ export default class Server extends WebSocket.Server {
         },
       });
       this.requests.set(id, request);
-      device.send(rpcRequest(method, params ?? null, id));
+      device.send(RPCHelpers.rpcRequest(method, params ?? null, id));
     });
   }
 

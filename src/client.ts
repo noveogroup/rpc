@@ -7,9 +7,7 @@ import {
   Name,
   Request,
   RPCContext,
-  rpcError,
-  rpcRequest,
-  rpcResponse,
+  RPCHelpers,
 } from './common';
 
 export interface ClientOptions {
@@ -119,7 +117,7 @@ export default class Client extends WebSocket {
     }
 
     this.addEventListener('open', () => {
-      this.send(rpcRequest('connect', { id: params.token }, v4()));
+      this.send(RPCHelpers.rpcRequest('connect', { id: params.token }, v4()));
     });
 
     this.addEventListener('message', async (event) => {
@@ -133,7 +131,9 @@ export default class Client extends WebSocket {
         case MessageType.Request:
           const method = this.methods.get(message.method);
           if (!method) {
-            return this.send(rpcError(`Procedure not found.`, message.id));
+            return this.send(
+              RPCHelpers.rpcError(`Procedure not found.`, message.id),
+            );
           }
           try {
             const result = await method.call(
@@ -141,9 +141,9 @@ export default class Client extends WebSocket {
               message.params,
               this.prepareContext({ id: message.id }),
             );
-            this.send(rpcResponse(result, message.id));
+            this.send(RPCHelpers.rpcResponse(result, message.id));
           } catch (error) {
-            this.send(rpcError(error.message, message.id));
+            this.send(RPCHelpers.rpcError(error.message, message.id));
           }
           break;
         case MessageType.Response:
@@ -186,7 +186,7 @@ export default class Client extends WebSocket {
         },
       });
       this.requests.set(id, request);
-      this.send(rpcRequest(method, params ?? null, id));
+      this.send(RPCHelpers.rpcRequest(method, params ?? null, id));
     });
   }
 
