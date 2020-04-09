@@ -1,7 +1,7 @@
 import WebSocket, { ServerOptions as WSServerOptions } from 'ws';
 import { v4 } from 'uuid';
 import {
-  getMessageAndType,
+  getMessage,
   Id,
   JSONValue,
   MessageType,
@@ -144,11 +144,10 @@ export default class Server extends WebSocket.Server {
       });
       // Message processing
       ws.on('message', async (data: string) => {
-        const [type, message] = getMessageAndType(data);
-        if (!message || type === MessageType.Malformed) {
-          throw new Error(`Malformed message: ${data}`);
-        }
-        switch (type) {
+        const message = getMessage(data);
+        switch (message.type) {
+          case MessageType.Malformed:
+            throw new Error(`Malformed message: ${data}`);
           case MessageType.Connect:
             if (!message.params.id) {
               throw new Error(`No connection id presents in ${message.id}`);
@@ -186,11 +185,9 @@ export default class Server extends WebSocket.Server {
             if (!request) {
               throw new Error(`Wrong request id: ${message.id}`);
             }
-            if (typeof message.result !== 'undefined') {
-              request.resolve(message.result);
-            } else if (typeof message.error !== 'undefined') {
-              request.reject(new Error(message.error));
-            }
+            message.type === MessageType.Response
+              ? request.resolve(message.result)
+              : request.reject(new Error(message.error));
             this.requests.delete(message.id);
             break;
         }

@@ -12,38 +12,67 @@ export type Name = string;
  */
 export type JSONValue = object | [] | string | number | boolean | null;
 
+interface RPCConnect {
+  type: MessageType.Connect;
+  jsonrpc: '2.0';
+  id: Id;
+  method: 'connect';
+  params: {
+    id?: Id;
+    result?: boolean;
+  };
+}
+
+/**
+ * An error, if the sender rpc-call ended unexpectedly
+ */
+interface RPCError {
+  type: MessageType.Error;
+  jsonrpc: '2.0';
+  id: Id;
+  error: string;
+}
+
+/**
+ * Malformed message
+ */
+interface RPCMalformed {
+  type: MessageType.Malformed;
+}
+
+/**
+ * Method params. Library supports only one argument for the method and it
+ * must be an object (record with the different type which can be described
+ * by the json object)
+ */
+interface RPCRequest {
+  type: MessageType.Request;
+  jsonrpc: '2.0';
+  id: Id;
+  method: Name;
+  params: Record<string, any>;
+}
+
+/**
+ * Result of the method execution. And json type
+ */
+interface RPCResponse {
+  type: MessageType.Response;
+  jsonrpc: '2.0';
+  id: Id;
+  result: JSONValue;
+}
+
 /**
  * Common structure of the JSON-RPC 2.0 message
  * @internal
  */
-export interface RPCMessage {
-  /**
-   * Protocol version
-   */
-  jsonrpc: string;
-  /**
-   * Message unique id
-   */
-  id: Id;
-  /**
-   * Method name
-   */
-  method: Name;
-  /**
-   * Method params. Library supports only one argument for the method and it
-   * must be an object (record with the different type which can be described
-   * by the json object)
-   */
-  params: Record<string, any>;
-  /**
-   * Result of the method execution. And json type
-   */
-  result: any;
-  /**
-   * An error, if the sender rpc-call ended unexpectedly
-   */
-  error: string;
-}
+type RPCMessageType =
+  | RPCConnect
+  | RPCError
+  | RPCMalformed
+  | RPCRequest
+  | RPCResponse;
 
 /**
  * A default context object. Every local RPC call have an object
@@ -86,33 +115,52 @@ export enum MessageType {
 }
 
 /**
- * Returns the message type and a js-object which represents the message
- * @param data A message buffer received from the client
+ * Returns the message from the received websocket data
  * @internal
  */
-export function getMessageAndType(data: string): [MessageType, RPCMessage?] {
-  let message: RPCMessage;
+export function getMessage(data: string): RPCMessageType {
+  let message: any;
   try {
     message = JSON.parse(data);
   } catch (e) {
-    return [MessageType.Malformed];
+    return { type: MessageType.Malformed };
   }
   if (!message.id || message.jsonrpc !== '2.0') {
-    return [MessageType.Malformed];
+    return { type: MessageType.Malformed };
   }
-  let type: MessageType;
   if ('method' in message && message.method === 'connect') {
-    type = MessageType.Connect;
+    return {
+      type: MessageType.Connect,
+      jsonrpc: '2.0',
+      id: message.id,
+      method: 'connect',
+      params: { id: message.params.id },
+    };
   } else if ('method' in message) {
-    type = MessageType.Request;
+    return {
+      type: MessageType.Request,
+      jsonrpc: '2.0',
+      id: message.id,
+      method: message.method,
+      params: message.params,
+    };
   } else if ('result' in message) {
-    type = MessageType.Response;
+    return {
+      type: MessageType.Response,
+      jsonrpc: '2.0',
+      id: message.id,
+      result: message.result,
+    };
   } else if ('error' in message) {
-    type = MessageType.Error;
+    return {
+      type: MessageType.Error,
+      jsonrpc: '2.0',
+      id: message.id,
+      error: message.error,
+    };
   } else {
-    type = MessageType.Malformed;
+    return { type: MessageType.Malformed };
   }
-  return [type, message];
 }
 
 interface RequestParams {

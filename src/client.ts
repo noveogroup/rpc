@@ -1,6 +1,6 @@
 import { v4 } from 'react-native-uuid';
 import {
-  getMessageAndType,
+  getMessage,
   Id,
   JSONValue,
   MessageType,
@@ -123,13 +123,12 @@ export default class Client extends WebSocket {
     });
 
     this.addEventListener('message', async (event) => {
-      const [type, message] = getMessageAndType(event.data);
-      if (!message || type === MessageType.Malformed) {
-        throw new Error(`Malformed message: ${event.data}`);
-      }
-      switch (type) {
+      const message = getMessage(event.data);
+      switch (message.type) {
+        case MessageType.Malformed:
+          throw new Error(`Malformed message: ${event.data}`);
         case MessageType.Connect:
-          this.handshake(message.params.result);
+          this.handshake(message.params.result!);
           break;
         case MessageType.Request:
           const method = this.methods.get(message.method);
@@ -153,11 +152,9 @@ export default class Client extends WebSocket {
           if (!request) {
             throw new Error(`Wrong request id: ${message.id}`);
           }
-          if (typeof message.result !== 'undefined') {
-            request.resolve(message.result);
-          } else if (typeof message.error !== 'undefined') {
-            request.reject(new Error(message.error));
-          }
+          message.type === MessageType.Response
+            ? request.resolve(message.result)
+            : request.reject(new Error(message.error));
           this.requests.delete(message.id);
           break;
       }
