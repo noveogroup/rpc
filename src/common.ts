@@ -143,7 +143,7 @@ export function getMessage(data: string): RPCMessages.RPCMessageType {
       jsonrpc: '2.0',
       id: message.id,
       method: 'connect',
-      params: { id: message.params.id },
+      params: message.params,
     };
   } else if ('method' in message) {
     return {
@@ -211,13 +211,6 @@ export namespace RPCHelpers {
   }
 
   export function rpcResponse(result: any = null, id: Id): string {
-    console.log(
-      JSON.stringify({
-        jsonrpc: '2.0',
-        result,
-        id,
-      }),
-    );
     return JSON.stringify({
       jsonrpc: '2.0',
       result,
