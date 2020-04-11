@@ -9,6 +9,7 @@ import {
   RPCContext,
   RPCHelpers,
 } from './common';
+import { Errors } from './errors';
 
 export interface ClientOptions {
   /**
@@ -93,7 +94,7 @@ export default class Client extends WebSocket {
 
   private requests: Map<Id, Request>;
 
-  handshake: (connected: boolean) => void;
+  handshake: (connected: boolean) => void = () => {};
 
   private readonly prepareContext: (ctx: RPCContext) => any = (ctx) => ctx;
 
@@ -108,7 +109,6 @@ export default class Client extends WebSocket {
 
     this.methods = new Map();
     this.requests = new Map();
-    this.handshake = () => {};
     if (params.handshake) {
       this.handshake = params.handshake;
     }
@@ -124,7 +124,9 @@ export default class Client extends WebSocket {
       const message = getMessage(event.data);
       switch (message.type) {
         case MessageType.Malformed:
-          throw new Error(`Malformed message: ${event.data}`);
+          throw new Errors.InvalidJSONRPCError(
+            `Malformed message: ${event.data}`,
+          );
         case MessageType.Connect:
           this.handshake(message.params.result!);
           break;
@@ -150,11 +152,15 @@ export default class Client extends WebSocket {
         case MessageType.Error:
           const request = this.requests.get(message.id);
           if (!request) {
-            throw new Error(`Wrong request id: ${message.id}`);
+            throw new Errors.RequestError(`Wrong request id: ${message.id}`);
           }
           message.type === MessageType.Response
             ? request.resolve(message.result)
-            : request.reject(new Error(message.error));
+            : request.reject(
+                message.error === 'Procedure not found.'
+                  ? new Errors.ProcedureNotFoundError()
+                  : new Errors.RequestError(message.error),
+              );
           this.requests.delete(message.id);
           break;
       }
@@ -175,6 +181,9 @@ export default class Client extends WebSocket {
     method: string,
     params?: Record<string, any>,
   ): Promise<object | [] | string | number | boolean | null> {
+    if (this.readyState !== this.OPEN) {
+      throw new Errors.NotConnectedError();
+    }
     const id = v4();
     return new Promise((resolve, reject) => {
       const request = new Request({
@@ -228,5 +237,88 @@ export default class Client extends WebSocket {
     ) => Promise<JSONValue> | JSONValue | undefined,
   ) {
     this.methods.set(method, handler);
+  }
+}
+
+/**
+ * @internal
+ */
+export class ReconnectingClient {
+  private instance!: Client;
+
+  private readonly params: ClientOptions;
+
+  private interval = 5000;
+
+  private serverRejected = false;
+
+  constructor(params: ClientOptions) {
+    this.params = params;
+  }
+
+  async connect() {
+    return new Promise((resolve, reject) => {
+      const a = Math.random();
+      this.instance = new Client({
+        ...this.params,
+        handshake: (connected) => {
+          if (connected) {
+            // @ts-ignore
+            console.log('connected', a, this.instance.a);
+            resolve(this.instance);
+          } else {
+            this.serverRejected = true;
+            reject(
+              new Errors.NotConnectedError(`Couldn't connect to the server`),
+            );
+          }
+        },
+      });
+      // @ts-ignore
+      this.instance.a = a;
+      /* this.instance.addEventListener('error', (event) => {
+        console.log('error', a);
+        console.log(event);
+        // reject(event);
+      }); */
+      this.instance.addEventListener('close', async (_event) => {
+        // @ts-ignore
+        console.log('close', a, this.instance.a);
+        if (!this.serverRejected) {
+          this.reconnect();
+        }
+      });
+    });
+  }
+
+  private reconnect() {
+    // @ts-ignore
+    console.log('reconnecting after 5 sec', this.instance.a);
+    setTimeout(() => this.connect(), this.interval);
+  }
+
+  call(
+    method: string,
+    params?: Record<string, any>,
+  ): Promise<object | [] | string | number | boolean | null> {
+    return this.instance.call(method, params);
+  }
+
+  register(
+    method: string,
+    handler: (
+      params: Record<string, any>,
+      ctx: RPCContext,
+    ) => Promise<JSONValue> | JSONValue | undefined,
+  ) {
+    this.instance.register(method, handler);
+  }
+
+  addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions,
+  ): void {
+    this.instance.addEventListener(type, listener, options);
   }
 }
