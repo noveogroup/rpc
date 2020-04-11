@@ -10,6 +10,7 @@ import {
   RPCContext,
   RPCHelpers,
 } from './common';
+import { Errors } from './errors';
 
 /**
  * Current dual-ws-rpc server statistics
@@ -165,10 +166,12 @@ export default class Server extends WebSocket.Server {
         const message = getMessage(data);
         switch (message.type) {
           case MessageType.Malformed:
-            throw new Error(`Malformed message: ${data}`);
+            throw new Errors.InvalidJSONRPCError(`Malformed message: ${data}`);
           case MessageType.Connect:
             if (!message.params.id) {
-              throw new Error(`No connection id presents in ${message.id}`);
+              throw new Errors.InvalidJSONRPCError(
+                `No connection id presents in ${message.id}`,
+              );
             }
             this.devices.set(message.params.id, ws);
             ws.token = message.params.id;
@@ -206,11 +209,15 @@ export default class Server extends WebSocket.Server {
           case MessageType.Error:
             const request = this.requests.get(message.id);
             if (!request) {
-              throw new Error(`Wrong request id: ${message.id}`);
+              throw new Errors.RequestError(`Wrong request id: ${message.id}`);
             }
             message.type === MessageType.Response
               ? request.resolve(message.result)
-              : request.reject(new Error(message.error));
+              : request.reject(
+                  message.error === 'Procedure not found.'
+                    ? new Errors.ProcedureNotFoundError()
+                    : new Errors.RequestError(message.error),
+                );
             this.requests.delete(message.id);
             break;
         }
@@ -253,7 +260,9 @@ export default class Server extends WebSocket.Server {
   ): Promise<JSONValue> {
     const device = this.devices.get(token);
     if (!device) {
-      throw new Error(`Client with token: ${token} doesn't connected`);
+      throw new Errors.NotConnectedError(
+        `Client with token: ${token} doesn't connected`,
+      );
     }
     const id = v4();
     return new Promise((resolve, reject) => {
