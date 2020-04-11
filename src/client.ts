@@ -256,34 +256,29 @@ export class ReconnectingClient {
     this.params = params;
   }
 
-  async connect() {
+  async connect(): Promise<Client> {
     return new Promise((resolve, reject) => {
-      const a = Math.random();
       this.instance = new Client({
         ...this.params,
         handshake: (connected) => {
           if (connected) {
-            // @ts-ignore
-            console.log('connected', a, this.instance.a);
+            // this.instance.dispatchEvent(new Event('handshake'));
             resolve(this.instance);
           } else {
             this.serverRejected = true;
             reject(
-              new Errors.NotConnectedError(`Couldn't connect to the server`),
+              new Errors.NotConnectedError(
+                `The server rejected the connection`,
+              ),
             );
           }
         },
       });
-      // @ts-ignore
-      this.instance.a = a;
       /* this.instance.addEventListener('error', (event) => {
-        console.log('error', a);
         console.log(event);
         // reject(event);
       }); */
       this.instance.addEventListener('close', async (_event) => {
-        // @ts-ignore
-        console.log('close', a, this.instance.a);
         if (!this.serverRejected) {
           this.reconnect();
         }
