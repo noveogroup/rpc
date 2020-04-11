@@ -1,6 +1,6 @@
 {
   "name": "@noveo/dual-rpc-ws",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "Remote procedure call",
   "types": "build/index.d.ts",
   "main": "build/index.js",
@@ -8,7 +8,9 @@
     "docs": "typedoc src",
     "test": "npm run build && node build/test.js",
     "build": "tsc --build tsconfig.json && tsc --build tsconfig.client.json",
-    "prepare": "npm run-script build"
+    "prepare": "npm run-script build",
+    "prepublishOnly": "npm run build && npm run docs",
+    "react": "npm run build && copy \"./*.js\" \"../RNN/node_modules/@noveo/dual-rpc-ws\" && copy \"./*.d.ts\" \"../RNN/node_modules/@noveo/dual-rpc-ws\""
   },
   "author": "",
   "license": "MIT",
@@ -22,6 +24,7 @@
     "ws": "^7.2.3"
   },
   "devDependencies": {
+    "copy": "^0.3.2",
     "prettier": "^1.19.1",
     "typedoc": "^0.17.4",
     "typescript": "^3.8.3"
