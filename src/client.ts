@@ -10,6 +10,7 @@ import {
   RPCHelpers,
 } from './common';
 import { Errors } from './errors';
+import NotConnectedError = Errors.NotConnectedError;
 
 export interface ClientOptions {
   /**
@@ -244,13 +245,21 @@ export default class Client extends WebSocket {
  * @internal
  */
 export class ReconnectingClient {
-  private instance!: Client;
+  private instance?: Client;
 
   private readonly params: ClientOptions;
 
   private interval = 5000;
 
   private serverRejected = false;
+
+  private listeners: Map<
+    Name,
+    Map<
+      EventListenerOrEventListenerObject,
+      boolean | AddEventListenerOptions | undefined
+    >
+  > = new Map();
 
   constructor(params: ClientOptions) {
     this.params = params;
@@ -262,7 +271,8 @@ export class ReconnectingClient {
         ...this.params,
         handshake: (connected) => {
           if (connected) {
-            // this.instance.dispatchEvent(new Event('handshake'));
+            // @ts-ignore
+            this.instance.dispatchEvent({ type: 'reconnect' });
             resolve(this.instance);
           } else {
             this.serverRejected = true;
@@ -288,7 +298,6 @@ export class ReconnectingClient {
 
   private reconnect() {
     // @ts-ignore
-    console.log('reconnecting after 5 sec', this.instance.a);
     setTimeout(() => this.connect(), this.interval);
   }
 
@@ -296,7 +305,11 @@ export class ReconnectingClient {
     method: string,
     params?: Record<string, any>,
   ): Promise<object | [] | string | number | boolean | null> {
-    return this.instance.call(method, params);
+    if (this.instance) {
+      return this.instance.call(method, params);
+    } else {
+      throw new NotConnectedError();
+    }
   }
 
   register(
@@ -306,7 +319,11 @@ export class ReconnectingClient {
       ctx: RPCContext,
     ) => Promise<JSONValue> | JSONValue | undefined,
   ) {
-    this.instance.register(method, handler);
+    if (this.instance) {
+      this.instance.register(method, handler);
+    } else {
+      // TODO remember all registers
+    }
   }
 
   addEventListener(
@@ -314,6 +331,33 @@ export class ReconnectingClient {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions,
   ): void {
-    this.instance.addEventListener(type, listener, options);
+    const typeListeners = this.listeners.get(type);
+    if (typeListeners) {
+      typeListeners.set(listener, options);
+    } else {
+      this.listeners.set(type, new Map([[listener, options]]));
+    }
+    if (this.instance) {
+      this.instance.addEventListener(type, listener, options);
+    }
+  }
+
+  removeEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+  ): void {
+    const typeListeners = this.listeners.get(type);
+    if (typeListeners) {
+      typeListeners.delete(listener);
+    }
+    if (this.instance) {
+      this.instance.removeEventListener(type, listener);
+    }
+  }
+
+  removeAllListeners() {
+    /* if (this.instance) {
+      for (const typeListeners of  )
+    } */
   }
 }
