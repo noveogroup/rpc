@@ -378,14 +378,6 @@ export class ReconnectingClient {
     }
   }
 
-  on(
-    type: string,
-    listener: EventListenerOrEventListenerObject,
-    options?: boolean | AddEventListenerOptions,
-  ): void {
-    this.addEventListener(type, listener, options);
-  }
-
   addEventListener(
     type: string,
     listener: EventListenerOrEventListenerObject,
@@ -400,13 +392,6 @@ export class ReconnectingClient {
     if (this.instance) {
       this.instance.addEventListener(type, listener, options);
     }
-  }
-
-  emit<K extends keyof ReconnectingClientEventMap>(
-    type: K,
-    event: ReconnectingClientEventMap[K],
-  ): void {
-    this.dispatchEvent(type, event);
   }
 
   dispatchEvent<K extends keyof ReconnectingClientEventMap>(
@@ -440,9 +425,11 @@ export class ReconnectingClient {
   }
 
   removeAllListeners() {
-    /* if (this.instance) {
-      for (const typeListeners of  )
-    } */
+    for (const [type, listeners] of this.listeners) {
+      for (const [listener, options] of listeners) {
+        this.removeEventListener(type, listener);
+      }
+    }
   }
 
   private attachMethodsAndListeners() {
