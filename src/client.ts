@@ -261,6 +261,14 @@ export class ReconnectingClient {
     >
   > = new Map();
 
+  private methods: Map<
+    Name,
+    (
+      params: Record<string, any>,
+      ctx: RPCContext,
+    ) => Promise<JSONValue> | JSONValue | undefined
+  > = new Map();
+
   constructor(params: ClientOptions) {
     this.params = params;
   }
@@ -271,8 +279,10 @@ export class ReconnectingClient {
         ...this.params,
         handshake: (connected) => {
           if (connected) {
-            // @ts-ignore
-            this.instance.dispatchEvent({ type: 'reconnect' });
+            if (this.instance) {
+              // @ts-ignore
+              this.instance.dispatchEvent('reconnect');
+            }
             resolve(this.instance);
           } else {
             this.serverRejected = true;
@@ -284,10 +294,12 @@ export class ReconnectingClient {
           }
         },
       });
-      /* this.instance.addEventListener('error', (event) => {
+      /*
+      this.instance.addEventListener('error', (event) => {
         console.log(event);
         // reject(event);
-      }); */
+      });
+      */
       this.instance.addEventListener('close', async (_event) => {
         if (!this.serverRejected) {
           this.reconnect();
@@ -297,7 +309,6 @@ export class ReconnectingClient {
   }
 
   private reconnect() {
-    // @ts-ignore
     setTimeout(() => this.connect(), this.interval);
   }
 
@@ -319,10 +330,9 @@ export class ReconnectingClient {
       ctx: RPCContext,
     ) => Promise<JSONValue> | JSONValue | undefined,
   ) {
+    this.methods.set(method, handler);
     if (this.instance) {
       this.instance.register(method, handler);
-    } else {
-      // TODO remember all registers
     }
   }
 
