@@ -229,13 +229,21 @@ export default class Client extends WebSocket {
    * @param handler
    */
   register(
-    method: string,
+    method: Name,
     handler: (
       params: Record<string, any>,
       ctx: RPCContext,
     ) => Promise<JSONValue> | JSONValue | undefined,
   ) {
     this.methods.set(method, handler);
+  }
+
+  /**
+   * Unregister the method on the client side
+   * @param method
+   */
+  unregister(method: Name): void {
+    this.methods.delete(method);
   }
 }
 

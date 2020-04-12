@@ -324,6 +324,14 @@ export default class Server extends WebSocket.Server {
     this.methods.set(method, handler);
   }
 
+  /**
+   * Unregister the method on the server side
+   * @param method
+   */
+  unregister(method: Name): void {
+    this.methods.delete(method);
+  }
+
   get stats(): ServerStats {
     return {
       connections: [...this.devices.keys()],
