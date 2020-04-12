@@ -249,9 +249,11 @@ export default class Server extends WebSocket.Server {
    * @param method The name of the remote method to call
    * @param params Method arguments
    * @throws one of these errors:
-   * - When the client with token doesn't connected
-   * - When the method doesn't present on the client side
-   * - When the method call on the client side triggered an exception
+   * - {@link Errors.NotConnectedError} When the client with token isn't connected
+   * - {@link Errors.ProcedureNotFoundError} When the method doesn't present on
+   * the client side
+   * - {@link Errors.RequestError} When the method call on the client side
+   * triggered an exception
    */
   async call(
     token: Id,
