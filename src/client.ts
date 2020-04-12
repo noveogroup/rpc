@@ -91,9 +91,9 @@ export default class Client extends WebSocket {
       params: Record<string, any>,
       ctx: RPCContext,
     ) => Promise<JSONValue> | JSONValue | undefined
-  >;
+  > = new Map();
 
-  private requests: Map<Id, Request>;
+  private requests: Map<Id, Request> = new Map();
 
   handshake: (connected: boolean) => void = () => {};
 
@@ -108,8 +108,6 @@ export default class Client extends WebSocket {
   constructor(params: ClientOptions) {
     super(params.address, params.protocols);
 
-    this.methods = new Map();
-    this.requests = new Map();
     if (params.handshake) {
       this.handshake = params.handshake;
     }
