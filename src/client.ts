@@ -249,7 +249,6 @@ export default class Client extends WebSocket {
 
 class ReconnectingClientEvent implements Event {
   constructor() {}
-
   readonly AT_TARGET: number = 0;
   readonly BUBBLING_PHASE: number = 1;
   readonly CAPTURING_PHASE: number = 2;
@@ -267,23 +266,18 @@ class ReconnectingClientEvent implements Event {
   readonly target: null;
   readonly timeStamp: number = Date.now();
   readonly type: string = 'ReconnectingClientEvent';
-
   composedPath(): EventTarget[] {
     return [];
   }
-
   initEvent(): void {}
-
   preventDefault(): void {}
-
   stopImmediatePropagation(): void {}
-
   stopPropagation(): void {}
 }
 
-interface ReconnectingClientEventMap {
+type ReconnectingClientEventMap = {
   reconnect: ReconnectingClientEvent;
-}
+};
 
 export class ReconnectingClient {
   private instance?: Client;
@@ -300,11 +294,6 @@ export class ReconnectingClient {
       EventListenerOrEventListenerObject,
       boolean | AddEventListenerOptions | undefined
     >
-  > = new Map();
-
-  private innerListeners: Map<
-    Name,
-    EventListenerOrEventListenerObject
   > = new Map();
 
   private methods: Map<
@@ -326,6 +315,7 @@ export class ReconnectingClient {
         handshake: (connected) => {
           if (connected) {
             if (this.instance) {
+              this.attachMethodsAndListeners();
               this.dispatchEvent('reconnect', new ReconnectingClientEvent());
             }
             resolve(this.instance);
@@ -381,6 +371,13 @@ export class ReconnectingClient {
     }
   }
 
+  unregister(method: Name): void {
+    this.methods.delete(method);
+    if (this.instance) {
+      this.instance.unregister(method);
+    }
+  }
+
   on(
     type: string,
     listener: EventListenerOrEventListenerObject,
@@ -416,14 +413,16 @@ export class ReconnectingClient {
     type: K,
     event: ReconnectingClientEventMap[K],
   ): void {
-    const handler = this.innerListeners.get(type);
-    if (!handler) {
+    const handlers = this.listeners.get(type);
+    if (!handlers) {
       return;
     }
-    if ('handleEvent' in handler) {
-      handler.handleEvent(event);
-    } else {
-      handler(event);
+    for (const handler of handlers.keys()) {
+      if ('handleEvent' in handler) {
+        handler.handleEvent(event);
+      } else {
+        handler(event);
+      }
     }
   }
 
@@ -444,5 +443,18 @@ export class ReconnectingClient {
     /* if (this.instance) {
       for (const typeListeners of  )
     } */
+  }
+
+  private attachMethodsAndListeners() {
+    if (this.instance) {
+      for (const [method, handler] of this.methods) {
+        this.instance.register(method, handler);
+      }
+      for (const [type, listeners] of this.listeners) {
+        for (const [listener, options] of listeners) {
+          this.addEventListener(type, listener, options);
+        }
+      }
+    }
   }
 }
