@@ -307,10 +307,10 @@ type ReconnectingClientEventMap = {
  *                 🠗
  *  // when the client establishes a websocket connection, it can
  *  // 🛑 reject the promise and emits `connectError` event if server refuses
- *  //   the connection. And it stops any connection attempts until you execute
- *  //   `init` method again
+ *  //   the client to connect with its token. Thus it stops any connection
+ *  //   attempts until you execute `init` method again.
  *  // 👌 resolve the promise and emits `connect` event if the server accepts
- *  //   the connection
+ *  //   the connection.
  *                 🠗
  *       await client.call('serverMethod' {...args});
  *       client.register('method3', handler3);
