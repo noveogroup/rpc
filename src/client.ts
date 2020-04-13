@@ -445,6 +445,7 @@ export class ReconnectingClient {
       });
       */
       this.instance.addEventListener('close', async (_event) => {
+        this.removeAllListeners(false);
         try {
           await this.close();
           if (!this.connectedForTheFirstTime) {
@@ -611,9 +612,10 @@ export class ReconnectingClient {
   removeEventListener(
     type: string,
     listener: EventListenerOrEventListenerObject,
+    totallyRemove = true,
   ): void {
     const typeListeners = this.listeners.get(type);
-    if (typeListeners) {
+    if (typeListeners && totallyRemove) {
       typeListeners.delete(listener);
     }
     if (this.instance) {
@@ -621,10 +623,10 @@ export class ReconnectingClient {
     }
   }
 
-  removeAllListeners() {
+  removeAllListeners(totallyRemove = true) {
     for (const [type, listeners] of this.listeners) {
       for (const listener of listeners.keys()) {
-        this.removeEventListener(type, listener);
+        this.removeEventListener(type, listener, totallyRemove);
       }
     }
   }
