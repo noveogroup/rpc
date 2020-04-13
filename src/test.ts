@@ -1,4 +1,5 @@
 import { Server } from './index';
+import Client from './client';
 
 /**
  * @hidden
@@ -19,9 +20,9 @@ ws.register('ping', (ctx, params) => {
 });
 
 ws.register('exception', async () => {
-  console.log(1);
-  await new Promise((resolve) => setTimeout(resolve, 3000));
-  console.log(2);
+  // console.log(1);
+  // await new Promise((resolve) => setTimeout(resolve, 3000));
+  // console.log(2);
   throw new Error('server exception');
 });
 
@@ -42,4 +43,4 @@ ws.register('run', async () => {
   }
 });
 
-setInterval(() => console.log(ws.stats), 3000);
+setInterval(() => console.log(ws.stats), 30000);
