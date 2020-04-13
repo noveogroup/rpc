@@ -10,7 +10,6 @@ import {
   RPCHelpers,
 } from './common';
 import { Errors } from './errors';
-import NotConnectedError = Errors.NotConnectedError;
 
 export interface ClientOptions {
   /**
@@ -522,7 +521,7 @@ export class ReconnectingClient {
     if (this.instance) {
       return this.instance.call(method, params);
     } else {
-      throw new NotConnectedError();
+      throw new Errors.NotConnectedError();
     }
   }
 
