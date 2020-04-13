@@ -68,9 +68,95 @@
 		<div class="col-8 col-content">
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A wrapper around the <a href="client.html">Client</a> class. It has almost the same methods and
+							events as the Client class, with the exception of the connection sequence.
+							So please refer documentation to the <a href="client.html">Client</a> class for the similar
+						methods.</p>
+					</div>
+					<p>The connection sequence looks like follows:</p>
+					<pre><code class="language-typescript"><span class="hljs-keyword">const</span> client = <span class="hljs-keyword">new</span> ReconnectingClient() <span class="hljs-comment">// creates an instance</span>
+                🠗
+      client.register(<span class="hljs-string">'method1'</span>, handler1);
+      <span class="hljs-keyword">await</span> client.init()
+      client.register(<span class="hljs-string">'method1'</span>, handler1);
+ <span class="hljs-comment">// inits the connection:</span>
+ <span class="hljs-comment">// ⌛ client now tries to connect to the server</span>
+                🠗
+ <span class="hljs-comment">// when the client establishes a websocket connection, it can</span>
+ <span class="hljs-comment">// 🛑 reject the promise and emits `connectError` event if server refuses</span>
+ <span class="hljs-comment">//   the connection. And it stops any connection attempts until you execute</span>
+ <span class="hljs-comment">//   `init` method again</span>
+ <span class="hljs-comment">// 👌 resolve the promise and emits `connect` event if the server accepts</span>
+ <span class="hljs-comment">//   the connection</span>
+                🠗
+      <span class="hljs-keyword">await</span> client.call(<span class="hljs-string">'serverMethod'</span> {...args});
+      client.register(<span class="hljs-string">'method2'</span>, handler2);
+ <span class="hljs-comment">// ⚡ if everything is 👌, here you can call server's methods. Note that when</span>
+ <span class="hljs-comment">// the client isn't connected every execution of the `call` method will</span>
+ <span class="hljs-comment">// throw an error.</span>
+                🠗
+    client.addEventListener(<span class="hljs-string">'connect'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'😃'</span>)});
+    client.addEventListener(<span class="hljs-string">'connectError'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {<span class="hljs-built_in">console</span>.error(<span class="hljs-string">'😟'</span>)});
+ <span class="hljs-comment">// 💥 when the connection to the server breaks, an `close`event will be</span>
+ <span class="hljs-comment">// raised</span>
+ <span class="hljs-comment">// ⌛ and the client will try to connect to the server again</span>
+ <span class="hljs-comment">// At this point you can check the connection status via `connect` or</span>
+ <span class="hljs-comment">// `connectError` events.</span>
+ <span class="hljs-comment">// And, as you can see, you can register client rpc-methods everywhere in</span>
+ <span class="hljs-comment">// the code after calling the constructor. And this methods along with</span>
+ <span class="hljs-comment">// the events will be connected to every new inner instance of the</span>
+ <span class="hljs-comment">// Client class</span></code></pre>
+					<p>This class can <a href="reconnectingclient.html#register">register</a> any method to call
+						it by the server.
+						And also can <a href="reconnectingclient.html#call">call</a> any method on the server and
+						receive response data.
+					And there are some events that can help you.</p>
+					<p>The main parts of this class are:</p>
+					<ul>
+						<li><a href="reconnectingclient.html#init">init</a> method to connect to the server</li>
+						<li><a href="reconnectingclient.html#close">close</a> event that triggers when connection
+						to the server is lost</li>
+						<li><a href="reconnectingclient.html#connect">connect</a> event that triggers when
+						the client successfully reconnects to the server</li>
+						<li><a href="reconnectingclient.html#connecterror">connectError</a> event that triggers
+						when the server refuses the client to connect</li>
+						<li><a href="reconnectingclient.html#register">register</a> method to handle clients&#39; calls</li>
+						<li><a href="reconnectingclient.html#call">call</a> method to execute clients&#39; methods</li>
+					</ul>
 					<dl class="tsd-comment-tags">
-						<dt>internal</dt>
-						<dd></dd>
+						<dt>example</dt>
+						<dd><pre><code class="language-typescript"><span class="hljs-keyword">import</span> { ReconnectingClient } <span class="hljs-keyword">from</span> <span class="hljs-string">'@noveo/dual-rpc-ws/client'</span>;
+<span class="hljs-keyword">const</span> client = <span class="hljs-keyword">new</span> ReconnectingClient({
+  token: <span class="hljs-string">'id13'</span>,
+  address: <span class="hljs-string">'ws://192.168.0.80:8080'</span>
+});
+<span class="hljs-keyword">try</span> {
+  <span class="hljs-keyword">await</span> client.connect();
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'successfully connected for the first time!'</span>);
+  client.register(<span class="hljs-string">'hi'</span>, <span class="hljs-function">(<span class="hljs-params">params, context</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'client hi, call id:'</span>, context.id);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">`<span class="hljs-subst">${token}</span>, hello`</span>);
+  });
+  client.addEventListener(<span class="hljs-string">'reconnect'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'successfully reconnected!'</span>);
+  });
+  client.addEventListener(<span class="hljs-string">'reconnectError'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'server refuses to reconnect!'</span>);
+  });
+  client.addEventListener(<span class="hljs-string">'close'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'connection closed!'</span>);
+  });
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> serverResponse = client.call(<span class="hljs-string">'hi'</span>, {message: <span class="hljs-string">'Server, hi!'</span>});
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello from server'</span>, serverResponse);
+  } <span class="hljs-keyword">catch</span>(e) {
+    <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Trouble with call'</span>, e.message);
+  }
+} <span class="hljs-keyword">catch</span>(e) {
+  <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'server refuses to connect!'</span>)
+}</code></pre>
+						</dd>
 					</dl>
 				</div>
 			</section>
@@ -92,11 +178,22 @@
 								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="reconnectingclient.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
+						<section class="tsd-index-section ">
+							<h3>Events</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-event tsd-parent-kind-class"><a href="reconnectingclient.html#close" class="tsd-kind-icon">close</a></li>
+								<li class="tsd-kind-event tsd-parent-kind-class"><a href="reconnectingclient.html#connect" class="tsd-kind-icon">connect</a></li>
+								<li class="tsd-kind-event tsd-parent-kind-class"><a href="reconnectingclient.html#connecterror" class="tsd-kind-icon">connect<wbr>Error</a></li>
+							</ul>
+						</section>
 						<section class="tsd-index-section tsd-is-private tsd-is-private-protected">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="reconnectingclient.html#connectedforthefirsttime" class="tsd-kind-icon">connected<wbr>For<wbr>The<wbr>First<wbr>Time</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="reconnectingclient.html#instance" class="tsd-kind-icon">instance</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="reconnectingclient.html#interval" class="tsd-kind-icon">interval</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="reconnectingclient.html#listeners" class="tsd-kind-icon">listeners</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="reconnectingclient.html#methods" class="tsd-kind-icon">methods</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="reconnectingclient.html#params" class="tsd-kind-icon">params</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="reconnectingclient.html#serverrejected" class="tsd-kind-icon">server<wbr>Rejected</a></li>
 							</ul>
@@ -105,10 +202,14 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="reconnectingclient.html#attachmethodsandlisteners" class="tsd-kind-icon">attach<wbr>Methods<wbr>And<wbr>Listeners</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#call" class="tsd-kind-icon">call</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#connect" class="tsd-kind-icon">connect</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="reconnectingclient.html#reconnect" class="tsd-kind-icon">reconnect</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="reconnectingclient.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#init" class="tsd-kind-icon">init</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#register" class="tsd-kind-icon">register</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#removealllisteners" class="tsd-kind-icon">remove<wbr>All<wbr>Listeners</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#unregister" class="tsd-kind-icon">unregister</a></li>
 							</ul>
 						</section>
 					</div>
@@ -126,13 +227,25 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/447362a/src/client.ts#L253">src/client.ts:253</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L411">src/client.ts:411</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creates the Client instance</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>params: <a href="../interfaces/clientoptions.html" class="tsd-signature-type">ClientOptions</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>An object which passed out to define all the main properties
+												of the server. Notable fields are: <a href="../interfaces/clientoptions.html#address">ClientOptions.address</a>,
+											<a href="../interfaces/clientoptions.html#preparecontext">ClientOptions.prepareContext</a>.</p>
+										</div>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="reconnectingclient.html" class="tsd-signature-type">ReconnectingClient</a></h4>
@@ -140,15 +253,95 @@
 					</ul>
 				</section>
 			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Events</h2>
+				<section class="tsd-panel tsd-member tsd-kind-event tsd-parent-kind-class">
+					<a name="close" class="tsd-anchor"></a>
+					<h3>close</h3>
+					<ul class="tsd-signatures tsd-kind-event tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">close<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L487">src/client.ts:487</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Fires when the connection with the server closes</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-event tsd-parent-kind-class">
+					<a name="connect" class="tsd-anchor"></a>
+					<h3>connect</h3>
+					<ul class="tsd-signatures tsd-kind-event tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">connect<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L467">src/client.ts:467</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Fires when the client successfully reconnects to the server</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-event tsd-parent-kind-class">
+					<a name="connecterror" class="tsd-anchor"></a>
+					<h3>connect<wbr>Error</h3>
+					<ul class="tsd-signatures tsd-kind-event tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">connect<wbr>Error<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L478">src/client.ts:478</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Fires when the server refuses the client to connect in the reconnection
+									attempt</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
 			<section class="tsd-panel-group tsd-member-group tsd-is-private tsd-is-private-protected">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="connectedforthefirsttime" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> connected<wbr>For<wbr>The<wbr>First<wbr>Time</h3>
+					<div class="tsd-signature tsd-kind-icon">connected<wbr>For<wbr>The<wbr>First<wbr>Time<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L395">src/client.ts:395</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
 					<a name="instance" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> instance</h3>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> <span class="tsd-flag ts-flagOptional">Optional</span> instance</h3>
 					<div class="tsd-signature tsd-kind-icon">instance<span class="tsd-signature-symbol">:</span> <a href="client.html" class="tsd-signature-type">Client</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/447362a/src/client.ts#L247">src/client.ts:247</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L387">src/client.ts:387</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -158,7 +351,27 @@
 					<div class="tsd-signature tsd-kind-icon">interval<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 5000</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/447362a/src/client.ts#L251">src/client.ts:251</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L391">src/client.ts:391</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="listeners" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> listeners</h3>
+					<div class="tsd-signature tsd-kind-icon">listeners<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#name" class="tsd-signature-type">Name</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EventListenerOrEventListenerObject</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Map()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L397">src/client.ts:397</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="methods" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> methods</h3>
+					<div class="tsd-signature tsd-kind-icon">methods<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#name" class="tsd-signature-type">Name</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">(</span>params<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, ctx<span class="tsd-signature-symbol">: </span><a href="../interfaces/rpccontext.html" class="tsd-signature-type">RPCContext</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#jsonvalue" class="tsd-signature-type">JSONValue</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><a href="../globals.html#jsonvalue" class="tsd-signature-type">JSONValue</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Map()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L405">src/client.ts:405</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -168,7 +381,7 @@
 					<div class="tsd-signature tsd-kind-icon">params<span class="tsd-signature-symbol">:</span> <a href="../interfaces/clientoptions.html" class="tsd-signature-type">ClientOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/447362a/src/client.ts#L249">src/client.ts:249</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L389">src/client.ts:389</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -178,7 +391,7 @@
 					<div class="tsd-signature tsd-kind-icon">server<wbr>Rejected<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/447362a/src/client.ts#L253">src/client.ts:253</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L393">src/client.ts:393</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -195,7 +408,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/447362a/src/client.ts#L317">src/client.ts:317</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L579">src/client.ts:579</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -214,6 +427,23 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="attachmethodsandlisteners" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> attach<wbr>Methods<wbr>And<wbr>Listeners</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">attach<wbr>Methods<wbr>And<wbr>Listeners<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L633">src/client.ts:633</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="call" class="tsd-anchor"></a>
 					<h3>call</h3>
@@ -224,53 +454,106 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/447362a/src/client.ts#L300">src/client.ts:300</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L518">src/client.ts:518</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Call the server method using params as one argument construction.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>throws</dt>
+									<dd><p>one of these errors:</p>
+										<ul>
+											<li><a href="errors.procedurenotfounderror.html">Errors.ProcedureNotFoundError</a> When the method doesn&#39;t present on
+											the server side</li>
+											<li><a href="errors.requesterror.html">Errors.RequestError</a> When the method call on the server
+											triggered an exception</li>
+											<li><a href="errors.notconnectederror.html">Errors.NotConnectedError</a> When the socket isn&#39;t connected to the
+											server</li>
+										</ul>
+									</dd>
+								</dl>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>method: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The name of the remote method to call</p>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> params: <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Method arguments</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>Returns a Promise with the JSON response from the client. It can be an
+							object, an array or a primitive.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+					<a name="dispatchevent" class="tsd-anchor"></a>
+					<h3>dispatch<wbr>Event</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">dispatch<wbr>Event&lt;K&gt;<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">K</span>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ReconnectingClientEventMap</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">K</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L595">src/client.ts:595</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>K<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-type">ReconnectingClientEventMap</span></h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>type: <span class="tsd-signature-type">K</span></h5>
+								</li>
+								<li>
+									<h5>event: <span class="tsd-signature-type">ReconnectingClientEventMap</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">K</span><span class="tsd-signature-symbol">]</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="connect" class="tsd-anchor"></a>
-					<h3>connect</h3>
+					<a name="init" class="tsd-anchor"></a>
+					<h3>init</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">connect<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">init<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="reconnectingclient.html" class="tsd-signature-type">ReconnectingClient</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/447362a/src/client.ts#L259">src/client.ts:259</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L429">src/client.ts:429</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
-					<a name="reconnect" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> reconnect</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
-						<li class="tsd-signature tsd-kind-icon">reconnect<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/447362a/src/client.ts#L294">src/client.ts:294</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Establish tho connection to the server using an address and unique id that
+									specifies the client&#39;s constructor.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>throws</dt>
+									<dd><p><a href="errors.notconnectederror.html">Errors.NotConnectedError</a> Exception is thrown when the server
+										refuses the client to connect.</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="reconnectingclient.html" class="tsd-signature-type">ReconnectingClient</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -284,9 +567,37 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/447362a/src/client.ts#L307">src/client.ts:307</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L559">src/client.ts:559</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Register the method on the client side, handler must return an object or a Promise&lt;object&gt;
+									which will be held on the server side</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="language-typescript">client.register(<span class="hljs-string">'ping'</span>, <span class="hljs-function">(<span class="hljs-params">params</span>) =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'client ping'</span>, params);
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve({ client: <span class="hljs-string">'pong'</span> });
+});</code></pre>
+										<p>You can throw an exception in the handler and on the caller side the server
+										will catch the rejection of the calling promise.</p>
+									</dd>
+									<dt>example</dt>
+									<dd><pre><code class="language-typescript">client.register(<span class="hljs-string">'exception'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'client exception'</span>);
+});
+
+<span class="hljs-comment">// server</span>
+server.call(<span class="hljs-string">'&lt;YOUR_TOKEN&gt;'</span>, <span class="hljs-string">'exception'</span>, {})
+  .catch(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(e.message)); <span class="hljs-comment">// prints "client exception"</span></code></pre>
+										<p>If the function does not return a value, a value of <code>null</code> will be obtained
+											on the client side. Because there is no <code>undefined</code> value in the JSON
+										representation.</p>
+									</dd>
+								</dl>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -294,6 +605,8 @@
 								</li>
 								<li>
 									<h5>handler: <span class="tsd-signature-symbol">(</span>params<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, ctx<span class="tsd-signature-symbol">: </span><a href="../interfaces/rpccontext.html" class="tsd-signature-type">RPCContext</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#jsonvalue" class="tsd-signature-type">JSONValue</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><a href="../globals.html#jsonvalue" class="tsd-signature-type">JSONValue</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
 									<ul class="tsd-parameters">
 										<li class="tsd-parameter-signature">
 											<ul class="tsd-signatures tsd-kind-type-literal">
@@ -315,6 +628,72 @@
 											</ul>
 										</li>
 									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="removealllisteners" class="tsd-anchor"></a>
+					<h3>remove<wbr>All<wbr>Listeners</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">remove<wbr>All<wbr>Listeners<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L625">src/client.ts:625</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="removeeventlistener" class="tsd-anchor"></a>
+					<h3>remove<wbr>Event<wbr>Listener</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">remove<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, listener<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EventListenerOrEventListenerObject</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L612">src/client.ts:612</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>type: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>listener: <span class="tsd-signature-type">EventListenerOrEventListenerObject</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="unregister" class="tsd-anchor"></a>
+					<h3>unregister</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">unregister<span class="tsd-signature-symbol">(</span>method<span class="tsd-signature-symbol">: </span><a href="../globals.html#name" class="tsd-signature-type">Name</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/5e4e109/src/client.ts#L572">src/client.ts:572</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>method: <a href="../globals.html#name" class="tsd-signature-type">Name</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -347,11 +726,29 @@
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
 								<a href="reconnectingclient.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
+							<li class=" tsd-kind-event tsd-parent-kind-class">
+								<a href="reconnectingclient.html#close" class="tsd-kind-icon">close</a>
+							</li>
+							<li class=" tsd-kind-event tsd-parent-kind-class">
+								<a href="reconnectingclient.html#connect" class="tsd-kind-icon">connect</a>
+							</li>
+							<li class=" tsd-kind-event tsd-parent-kind-class">
+								<a href="reconnectingclient.html#connecterror" class="tsd-kind-icon">connect<wbr>Error</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="reconnectingclient.html#connectedforthefirsttime" class="tsd-kind-icon">connected<wbr>For<wbr>The<wbr>First<wbr>Time</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="reconnectingclient.html#instance" class="tsd-kind-icon">instance</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="reconnectingclient.html#interval" class="tsd-kind-icon">interval</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="reconnectingclient.html#listeners" class="tsd-kind-icon">listeners</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="reconnectingclient.html#methods" class="tsd-kind-icon">methods</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="reconnectingclient.html#params" class="tsd-kind-icon">params</a>
@@ -362,17 +759,29 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="reconnectingclient.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="reconnectingclient.html#attachmethodsandlisteners" class="tsd-kind-icon">attach<wbr>Methods<wbr>And<wbr>Listeners</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="reconnectingclient.html#call" class="tsd-kind-icon">call</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="reconnectingclient.html#connect" class="tsd-kind-icon">connect</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+								<a href="reconnectingclient.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
-								<a href="reconnectingclient.html#reconnect" class="tsd-kind-icon">reconnect</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="reconnectingclient.html#init" class="tsd-kind-icon">init</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="reconnectingclient.html#register" class="tsd-kind-icon">register</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="reconnectingclient.html#removealllisteners" class="tsd-kind-icon">remove<wbr>All<wbr>Listeners</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="reconnectingclient.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="reconnectingclient.html#unregister" class="tsd-kind-icon">unregister</a>
 							</li>
 						</ul>
 					</li>
@@ -410,6 +819,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="../globals.html#name" class="tsd-kind-icon">Name</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="../globals.html#notconnectederror" class="tsd-kind-icon">Not<wbr>Connected<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="../globals.html#getmessage" class="tsd-kind-icon">get<wbr>Message</a>

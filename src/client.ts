@@ -327,7 +327,9 @@ type ReconnectingClientEventMap = {
  *  // At this point you can check the connection status via `connect` or
  *  // `connectError` events.
  *  // And, as you can see, you can register client rpc-methods everywhere in
- *  // the code after calling the constructor.
+ *  // the code after calling the constructor. And this methods along with
+ *  // the events will be connected to every new inner instance of the
+ *  // Client class
  * ```
  *
  * This class can {@link ReconnectingClient.register|register} any method to call
