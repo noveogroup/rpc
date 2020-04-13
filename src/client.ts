@@ -356,16 +356,16 @@ type ReconnectingClientEventMap = {
  *   address: 'ws://192.168.0.80:8080'
  * });
  * try {
- *   await client.connect();
+ *   await client.init();
  *   console.log('successfully connected for the first time!');
  *   client.register('hi', (params, context) => {
  *     console.log('client hi, call id:', context.id);
  *     return Promise.resolve(`${token}, hello`);
  *   });
- *   client.addEventListener('reconnect', () => {
+ *   client.addEventListener('connect', () => {
  *     console.log('successfully reconnected!');
  *   });
- *   client.addEventListener('reconnectError', () => {
+ *   client.addEventListener('connectError', () => {
  *     console.error('server refuses to reconnect!');
  *   });
  *   client.addEventListener('close', () => {

@@ -132,16 +132,16 @@
   address: <span class="hljs-string">'ws://192.168.0.80:8080'</span>
 });
 <span class="hljs-keyword">try</span> {
-  <span class="hljs-keyword">await</span> client.connect();
+  <span class="hljs-keyword">await</span> client.init();
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'successfully connected for the first time!'</span>);
   client.register(<span class="hljs-string">'hi'</span>, <span class="hljs-function">(<span class="hljs-params">params, context</span>) =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'client hi, call id:'</span>, context.id);
     <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">`<span class="hljs-subst">${token}</span>, hello`</span>);
   });
-  client.addEventListener(<span class="hljs-string">'reconnect'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  client.addEventListener(<span class="hljs-string">'connect'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'successfully reconnected!'</span>);
   });
-  client.addEventListener(<span class="hljs-string">'reconnectError'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  client.addEventListener(<span class="hljs-string">'connectError'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'server refuses to reconnect!'</span>);
   });
   client.addEventListener(<span class="hljs-string">'close'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
@@ -227,7 +227,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L410">src/client.ts:410</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L410">src/client.ts:410</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -265,7 +265,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L486">src/client.ts:486</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L486">src/client.ts:486</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -287,7 +287,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L466">src/client.ts:466</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L466">src/client.ts:466</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -309,7 +309,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L477">src/client.ts:477</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L477">src/client.ts:477</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -331,7 +331,7 @@
 					<div class="tsd-signature tsd-kind-icon">connected<wbr>For<wbr>The<wbr>First<wbr>Time<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L394">src/client.ts:394</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L394">src/client.ts:394</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -341,7 +341,7 @@
 					<div class="tsd-signature tsd-kind-icon">instance<span class="tsd-signature-symbol">:</span> <a href="client.html" class="tsd-signature-type">Client</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L386">src/client.ts:386</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L386">src/client.ts:386</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -351,7 +351,7 @@
 					<div class="tsd-signature tsd-kind-icon">interval<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 5000</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L390">src/client.ts:390</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L390">src/client.ts:390</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -361,7 +361,7 @@
 					<div class="tsd-signature tsd-kind-icon">listeners<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#name" class="tsd-signature-type">Name</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EventListenerOrEventListenerObject</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Map()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L396">src/client.ts:396</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L396">src/client.ts:396</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -371,7 +371,7 @@
 					<div class="tsd-signature tsd-kind-icon">methods<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#name" class="tsd-signature-type">Name</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">(</span>params<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, ctx<span class="tsd-signature-symbol">: </span><a href="../interfaces/rpccontext.html" class="tsd-signature-type">RPCContext</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#jsonvalue" class="tsd-signature-type">JSONValue</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><a href="../globals.html#jsonvalue" class="tsd-signature-type">JSONValue</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Map()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L404">src/client.ts:404</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L404">src/client.ts:404</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -381,7 +381,7 @@
 					<div class="tsd-signature tsd-kind-icon">params<span class="tsd-signature-symbol">:</span> <a href="../interfaces/clientoptions.html" class="tsd-signature-type">ClientOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L388">src/client.ts:388</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L388">src/client.ts:388</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -391,7 +391,7 @@
 					<div class="tsd-signature tsd-kind-icon">server<wbr>Rejected<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L392">src/client.ts:392</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L392">src/client.ts:392</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -408,7 +408,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L578">src/client.ts:578</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L578">src/client.ts:578</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -437,7 +437,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L632">src/client.ts:632</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L632">src/client.ts:632</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -454,7 +454,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L517">src/client.ts:517</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L517">src/client.ts:517</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -506,7 +506,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L594">src/client.ts:594</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L594">src/client.ts:594</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -538,7 +538,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L428">src/client.ts:428</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L428">src/client.ts:428</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -567,7 +567,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L558">src/client.ts:558</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L558">src/client.ts:558</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -644,7 +644,7 @@ server.call(<span class="hljs-string">'&lt;YOUR_TOKEN&gt;'</span>, <span class="
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L624">src/client.ts:624</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L624">src/client.ts:624</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -661,7 +661,7 @@ server.call(<span class="hljs-string">'&lt;YOUR_TOKEN&gt;'</span>, <span class="
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L611">src/client.ts:611</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L611">src/client.ts:611</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -687,7 +687,7 @@ server.call(<span class="hljs-string">'&lt;YOUR_TOKEN&gt;'</span>, <span class="
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/d099ad7/src/client.ts#L571">src/client.ts:571</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L571">src/client.ts:571</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
