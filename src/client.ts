@@ -302,7 +302,7 @@ type ReconnectingClientEventMap = {
  *                 🠗
  *       client.register('method1', handler1);
  *       await client.init()
- *       client.register('method1', handler1);
+ *       client.register('method2', handler2);
  *  // inits the connection:
  *  // ⌛ client now tries to connect to the server
  *                 🠗
@@ -314,7 +314,7 @@ type ReconnectingClientEventMap = {
  *  //   the connection
  *                 🠗
  *       await client.call('serverMethod' {...args});
- *       client.register('method2', handler2);
+ *       client.register('method3', handler3);
  *  // ⚡ if everything is 👌, here you can call server's methods. Note that when
  *  // the client isn't connected every execution of the `call` method will
  *  // throw an error.
