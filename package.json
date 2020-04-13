@@ -6,17 +6,17 @@
   "main": "build/index.js",
   "scripts": {
     "docs": "typedoc src && git add ./docs",
-    "test": "npm run build && node build/test.js",
     "build": "tsc --build tsconfig.json && tsc --build tsconfig.client.json",
     "prepare": "npm run-script build",
     "prepublishOnly": "npm run build && npm run docs",
-    "react": "npm run build && copy \"./*.js\" \"../RNN/node_modules/@noveo/dual-rpc-ws\" && copy \"./*.d.ts\" \"../RNN/node_modules/@noveo/dual-rpc-ws\""
+    "node": "npm run build && node build/test.js",
+    "react": "npm run build && copy \"./*.js\" \"../RNN/node_modules/@noveo/dual-rpc-ws\" && copy \"./*.d.ts\" \"../RNN/node_modules/@noveo/dual-rpc-ws\"",
+    "test": "jest"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "@types/react-native-uuid": "^1.4.0",
-    "@types/uuid": "^7.0.0",
     "@types/ws": "^7.2.2",
     "buffer": "^5.5.0",
     "kind-of": "^6.0.3",
@@ -26,11 +26,17 @@
   },
   "devDependencies": {
     "@types/jest": "^25.2.1",
+    "@types/uuid": "^7.0.0",
     "copy": "^0.3.2",
     "jest": "^25.3.0",
     "prettier": "^1.19.1",
     "ts-jest": "^25.3.1",
     "typedoc": "^0.17.4",
     "typescript": "^3.8.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testRegex": ".test.ts$",
+    "rootDir": "./test"
   }
 }
