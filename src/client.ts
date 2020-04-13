@@ -426,24 +426,19 @@ export class ReconnectingClient {
    * refuses the client to connect.
    */
   async init(): Promise<ReconnectingClient> {
+    this.connectedForTheFirstTime = false;
     return new Promise((resolve, reject) => {
       this.instance = new Client({
         ...this.params,
         handshake: (connected) => {
           if (connected) {
-            this.connect();
+            this.connect(); // event
             resolve(this);
           } else {
-            this.connectError();
+            this.connectError(); // event
           }
         },
       });
-      /*
-      this.instance.addEventListener('error', (event) => {
-        console.log(event);
-        // reject(event);
-      });
-      */
       this.instance.addEventListener('close', async (_event) => {
         this.removeAllListeners(false);
         try {
@@ -458,6 +453,24 @@ export class ReconnectingClient {
         }
       });
     });
+  }
+
+  /**
+   * Fires when the connection with the server closes
+   * @event close
+   */
+  async close() {
+    if (!this.serverRejected) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          this.init()
+            .then(() => resolve(this))
+            .catch(reject);
+        }, this.interval);
+      });
+    } else {
+      throw new Errors.NotConnectedError(`The server rejected the connection`);
+    }
   }
 
   /**
@@ -478,27 +491,6 @@ export class ReconnectingClient {
   connectError() {
     this.serverRejected = true;
     this.dispatchEvent('connectError', new ReconnectingClientEvent());
-  }
-
-  /**
-   * Fires when the connection with the server closes
-   * @event close
-   */
-  async close() {
-    if (!this.serverRejected) {
-      return new Promise((resolve, reject) => {
-        setTimeout(async () => {
-          try {
-            await this.init();
-            resolve(this);
-          } catch (e) {
-            reject(e);
-          }
-        }, this.interval);
-      });
-    } else {
-      throw new Errors.NotConnectedError(`The server rejected the connection`);
-    }
   }
 
   /**
@@ -623,6 +615,11 @@ export class ReconnectingClient {
     }
   }
 
+  /**
+   * Additional method to remove all listeners. See
+   * https://html.spec.whatwg.org/multipage/web-sockets.html#garbage-collection-2
+   * @param totallyRemove Remove them only from the websocket instance
+   */
   removeAllListeners(totallyRemove = true) {
     for (const [type, listeners] of this.listeners) {
       for (const listener of listeners.keys()) {
