@@ -173,8 +173,12 @@ export default class Client extends WebSocket {
    * @param method The name of the remote method to call
    * @param params Method arguments
    * @throws one of these errors:
-   * - When the method doesn't present on the server side
-   * - When the method call on the server triggered an exception
+   * - {@link Errors.ProcedureNotFoundError} When the method doesn't present on
+   * the server side
+   * - {@link Errors.RequestError} When the method call on the server
+   * triggered an exception
+   * - {@link Errors.NotConnectedError} When the socket isn't connected to the
+   * server
    */
   async call(
     method: string,
@@ -247,6 +251,9 @@ export default class Client extends WebSocket {
   }
 }
 
+/**
+ * @ignore
+ */
 class ReconnectingClientEvent implements Event {
   constructor() {}
   readonly AT_TARGET: number = 0;
@@ -275,10 +282,105 @@ class ReconnectingClientEvent implements Event {
   stopPropagation(): void {}
 }
 
+/**
+ * @ignore
+ */
 type ReconnectingClientEventMap = {
-  reconnect: ReconnectingClientEvent;
+  connect: ReconnectingClientEvent;
+  connectError: ReconnectingClientEvent;
 };
 
+/**
+ * A wrapper around the {@link Client} class. It has almost the same methods and
+ * events as the Client class, with the exception of the connection sequence.
+ * So please refer documentation to the {@link Client} class for the similar
+ * methods.
+ *
+ * The connection sequence looks like follows:
+ * ```typescript
+ * const client = new ReconnectingClient() // creates an instance
+ *                 🠗
+ *       client.register('method1', handler1);
+ *       await client.init()
+ *       client.register('method1', handler1);
+ *  // inits the connection:
+ *  // ⌛ client now tries to connect to the server
+ *                 🠗
+ *  // when the client establishes a websocket connection, it can
+ *  // 🛑 reject the promise and emits `connectError` event if server refuses
+ *  //   the connection. And it stops any connection attempts until you execute
+ *  //   `init` method again
+ *  // 👌 resolve the promise and emits `connect` event if the server accepts
+ *  //   the connection
+ *                 🠗
+ *       await client.call('serverMethod' {...args});
+ *       client.register('method2', handler2);
+ *  // ⚡ if everything is 👌, here you can call server's methods. Note that when
+ *  // the client isn't connected every execution of the `call` method will
+ *  // throw an error.
+ *                 🠗
+ *     client.addEventListener('connect', () => {console.log('😃')});
+ *     client.addEventListener('connectError', () => {console.error('😟')});
+ *  // 💥 when the connection to the server breaks, an `close`event will be
+ *  // raised
+ *  // ⌛ and the client will try to connect to the server again
+ *  // At this point you can check the connection status via `connect` or
+ *  // `connectError` events.
+ *  // And, as you can see, you can register client rpc-methods everywhere in
+ *  // the code after calling the constructor.
+ * ```
+ *
+ * This class can {@link ReconnectingClient.register|register} any method to call
+ * it by the server.
+ * And also can {@link ReconnectingClient.call|call} any method on the server and
+ * receive response data.
+ * And there are some events that can help you.
+ *
+ * The main parts of this class are:
+ * - {@link ReconnectingClient.init|init} method to connect to the server
+ * - {@link ReconnectingClient.close|close} event that triggers when connection
+ * to the server is lost
+ * - {@link ReconnectingClient.connect|connect} event that triggers when
+ * the client successfully reconnects to the server
+ * - {@link ReconnectingClient.connectError|connectError} event that triggers
+ * when the server refuses the client to connect
+ * - {@link ReconnectingClient.register|register} method to handle clients' calls
+ * - {@link ReconnectingClient.call|call} method to execute clients' methods
+ *
+ * @example
+ * ```typescript
+ * import { ReconnectingClient } from '@noveo/dual-rpc-ws/client';
+ * const client = new ReconnectingClient({
+ *   token: 'id13',
+ *   address: 'ws://192.168.0.80:8080'
+ * });
+ * try {
+ *   await client.connect();
+ *   console.log('successfully connected for the first time!');
+ *   client.register('hi', (params, context) => {
+ *     console.log('client hi, call id:', context.id);
+ *     return Promise.resolve(`${token}, hello`);
+ *   });
+ *   client.addEventListener('reconnect', () => {
+ *     console.log('successfully reconnected!');
+ *   });
+ *   client.addEventListener('reconnectError', () => {
+ *     console.error('server refuses to reconnect!');
+ *   });
+ *   client.addEventListener('close', () => {
+ *     console.log('connection closed!');
+ *   });
+ *   try {
+ *     const serverResponse = client.call('hi', {message: 'Server, hi!'});
+ *     console.log('Hello from server', serverResponse);
+ *   } catch(e) {
+ *     console.error('Trouble with call', e.message);
+ *   }
+ * } catch(e) {
+ *   console.error('server refuses to connect!')
+ * }
+ * ```
+ */
 export class ReconnectingClient {
   private instance?: Client;
 
@@ -287,6 +389,8 @@ export class ReconnectingClient {
   private interval = 5000;
 
   private serverRejected = false;
+
+  private connectedForTheFirstTime = false;
 
   private listeners: Map<
     Name,
@@ -304,28 +408,32 @@ export class ReconnectingClient {
     ) => Promise<JSONValue> | JSONValue | undefined
   > = new Map();
 
+  /**
+   * Creates the Client instance
+   * @param params An object which passed out to define all the main properties
+   * of the server. Notable fields are: {@link ClientOptions.address},
+   * {@link ClientOptions.prepareContext}.
+   */
   constructor(params: ClientOptions) {
     this.params = params;
   }
 
-  async connect(): Promise<Client> {
+  /**
+   * Establish tho connection to the server using an address and unique id that
+   * specifies the client's constructor.
+   * @throws {@link Errors.NotConnectedError} Exception is thrown when the server
+   * refuses the client to connect.
+   */
+  async init(): Promise<ReconnectingClient> {
     return new Promise((resolve, reject) => {
       this.instance = new Client({
         ...this.params,
         handshake: (connected) => {
           if (connected) {
-            if (this.instance) {
-              this.attachMethodsAndListeners();
-              this.dispatchEvent('reconnect', new ReconnectingClientEvent());
-            }
-            resolve(this.instance);
+            this.connect();
+            resolve(this);
           } else {
-            this.serverRejected = true;
-            reject(
-              new Errors.NotConnectedError(
-                `The server rejected the connection`,
-              ),
-            );
+            this.connectError();
           }
         },
       });
@@ -336,17 +444,75 @@ export class ReconnectingClient {
       });
       */
       this.instance.addEventListener('close', async (_event) => {
-        if (!this.serverRejected) {
-          this.reconnect();
+        try {
+          await this.close();
+          if (!this.connectedForTheFirstTime) {
+            resolve(this);
+          }
+        } catch (e) {
+          if (!this.connectedForTheFirstTime) {
+            reject(e);
+          }
         }
       });
     });
   }
 
-  private reconnect() {
-    setTimeout(() => this.connect(), this.interval);
+  /**
+   * Fires when the client successfully reconnects to the server
+   * @event connect
+   */
+  connect() {
+    this.connectedForTheFirstTime = true;
+    this.attachMethodsAndListeners();
+    this.dispatchEvent('connect', new ReconnectingClientEvent());
   }
 
+  /**
+   * Fires when the server refuses the client to connect in the reconnection
+   * attempt
+   * @event reconnectError
+   */
+  connectError() {
+    this.serverRejected = true;
+    this.dispatchEvent('connectError', new ReconnectingClientEvent());
+  }
+
+  /**
+   * Fires when the connection with the server closes
+   * @event close
+   */
+  async close() {
+    if (!this.serverRejected) {
+      return new Promise((resolve, reject) => {
+        setTimeout(async () => {
+          try {
+            await this.init();
+            resolve(this);
+          } catch (e) {
+            reject(e);
+          }
+        }, this.interval);
+      });
+    } else {
+      throw new Errors.NotConnectedError(`The server rejected the connection`);
+    }
+  }
+
+  /**
+   * Call the server method using params as one argument construction.
+   * @return Returns a Promise with the JSON response from the client. It can be an
+   * object, an array or a primitive.
+   * @param method The name of the remote method to call
+   * @param params Method arguments
+   * @throws one of these errors:
+   * - {@link Errors.ProcedureNotFoundError} When the method doesn't present on
+   * the server side
+   * - {@link Errors.RequestError} When the method call on the server
+   * triggered an exception
+   * - {@link Errors.NotConnectedError} When the socket isn't connected to the
+   * server
+   */
   call(
     method: string,
     params?: Record<string, any>,
@@ -358,6 +524,36 @@ export class ReconnectingClient {
     }
   }
 
+  /**
+   * Register the method on the client side, handler must return an object or a Promise\<object\>
+   * which will be held on the server side
+   * @example
+   * ```typescript
+   * client.register('ping', (params) => {
+   *   console.log('client ping', params);
+   *   return Promise.resolve({ client: 'pong' });
+   * });
+   * ```
+   * You can throw an exception in the handler and on the caller side the server
+   * will catch the rejection of the calling promise.
+   * @example
+   * ```typescript
+   * client.register('exception', () => {
+   *   throw new Error('client exception');
+   * });
+   *
+   * // server
+   * server.call('<YOUR_TOKEN>', 'exception', {})
+   *   .catch((e) => console.log(e.message)); // prints "client exception"
+   * ```
+   *
+   * If the function does not return a value, a value of `null` will be obtained
+   * on the client side. Because there is no `undefined` value in the JSON
+   * representation.
+   *
+   * @param method
+   * @param handler
+   */
   register(
     method: string,
     handler: (
@@ -426,7 +622,7 @@ export class ReconnectingClient {
 
   removeAllListeners() {
     for (const [type, listeners] of this.listeners) {
-      for (const [listener, options] of listeners) {
+      for (const listener of listeners.keys()) {
         this.removeEventListener(type, listener);
       }
     }
