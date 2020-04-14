@@ -11,7 +11,8 @@
     "prepublishOnly": "npm run build && npm run docs",
     "node": "npm run build && node build/test.js",
     "react": "npm run build && copy \"./*.js\" \"../RNN/node_modules/@noveo/dual-rpc-ws\" && copy \"./*.d.ts\" \"../RNN/node_modules/@noveo/dual-rpc-ws\"",
-    "test": "jest"
+    "test": "jest",
+    "coverage": "jest --coverage"
   },
   "author": "",
   "license": "MIT",
@@ -38,7 +39,6 @@
     "preset": "ts-jest",
     "verbose": true,
     "testMatch": ["**/*.test.ts"],
-    "collectCoverage": true,
     "coverageDirectory": "./coverage"
   }
 }
