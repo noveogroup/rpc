@@ -1,5 +1,5 @@
-import { Server } from './index';
-import Client from './client';
+import { Server } from '../src/index';
+import Client from '../src/client';
 
 /**
  * @hidden
