@@ -2,7 +2,6 @@ import kindOf from 'kind-of';
 import Server from '../src/server';
 import { ReconnectingClient } from '../src/client';
 import { Errors } from '../src/errors';
-import { Err } from 'typedoc/dist/lib/utils/result';
 
 const port = 3667;
 const serverParams = () => ({
@@ -12,7 +11,7 @@ const serverParams = () => ({
 let server!: Server;
 
 beforeAll(() => {
-  server = new Server({ port });
+  server = new Server({ port, prepareContext: (id) => id });
   server.register('promise', () => Promise.resolve({ server: 'pong' }));
   server.register('simple', () => ({ server: 'pong' }));
   server.register('string', () => '42');
@@ -73,7 +72,7 @@ test('call with the wrong message', async () => {
   const client = new ReconnectingClient(serverParams());
   await client.init();
   await new Promise((resolve) => {
-    server.on('error', (e) => {
+    server.once('error', (e) => {
       expect(e).toBeInstanceOf(Errors.InvalidJSONRPCError);
       expect(e.message).toStrictEqual(
         'Malformed message: bad json-rpc message',
@@ -82,6 +81,21 @@ test('call with the wrong message', async () => {
     });
     // @ts-ignore
     client.instance.send('bad json-rpc message');
+  });
+});
+
+test('call with message without id', async () => {
+  const client = new ReconnectingClient(serverParams());
+  await client.init();
+  await new Promise((resolve) => {
+    server.once('error', (e) => {
+      expect(e).toBeInstanceOf(Errors.InvalidJSONRPCError);
+      resolve();
+    });
+    // @ts-ignore
+    client.instance.send(
+      JSON.stringify({ jsonrpc: '2.0', method: 'ping', params: null }),
+    );
   });
 });
 
