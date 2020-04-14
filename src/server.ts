@@ -166,12 +166,21 @@ export default class Server extends WebSocket.Server {
         const message = getMessage(data);
         switch (message.type) {
           case MessageType.Malformed:
-            throw new Errors.InvalidJSONRPCError(`Malformed message: ${data}`);
+            this.error(
+              new Errors.InvalidJSONRPCError(`Malformed message: ${data}`),
+            );
+            // throw new Errors.InvalidJSONRPCError(`Malformed message: ${data}`);
+            break;
           case MessageType.Connect:
             if (!message.params.id) {
-              throw new Errors.InvalidJSONRPCError(
-                `No connection id presents in ${message.id}`,
+              return this.error(
+                new Errors.InvalidJSONRPCError(
+                  `No connection id presents in ${message.id}`,
+                ),
               );
+              // throw new Errors.InvalidJSONRPCError(
+              //   `No connection id presents in ${message.id}`,
+              // );
             }
             this.devices.set(message.params.id, ws);
             ws.token = message.params.id;
@@ -209,7 +218,9 @@ export default class Server extends WebSocket.Server {
           case MessageType.Error:
             const request = this.requests.get(message.id);
             if (!request) {
-              throw new Errors.RequestError(`Wrong request id: ${message.id}`);
+              return this.error(
+                new Errors.RequestError(`Wrong request id: ${message.id}`),
+              );
             }
             message.type === MessageType.Response
               ? request.resolve(message.result)
@@ -232,11 +243,30 @@ export default class Server extends WebSocket.Server {
    * @event rpcClose
    * @example
    * ```typescript
-   * rpc.on('rpcClose', (token) => console.log(`Client disconnected ${token}`));
+   * server.on('rpcClose', (token) => console.log(`Client disconnected ${token}`));
    * ```
    */
   rpcClose(token: Id) {
     this.emit('rpcClose', token);
+  }
+
+  /**
+   * Fires when the error happens
+   * @param error Error instance from {@link Errors} or {@link WebSocket} class
+   * @event error
+   * @example
+   * ```typescript
+   * server.on('error', (e) => {
+   *   if (e instanceof Errors.InvalidJSONRPCError) {
+   *     console.error('Wrong data from client');
+   *   } else {
+   *     console.error('Error', e);
+   *   }
+   * });
+   * ```
+   */
+  error(error: Error) {
+    this.emit('error', error);
   }
 
   /**
