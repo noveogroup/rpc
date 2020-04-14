@@ -134,11 +134,11 @@ export function getMessage(data: string): RPCMessages.RPCMessageType {
   } catch (e) {
     return { type: MessageType.Malformed };
   }
+  let messageType: RPCMessages.RPCMessageType;
   if (!message.id || message.jsonrpc !== '2.0') {
-    return { type: MessageType.Malformed };
-  }
-  if ('method' in message && message.method === 'connect') {
-    return {
+    messageType = { type: MessageType.Malformed };
+  } else if ('method' in message && message.method === 'connect') {
+    messageType = {
       type: MessageType.Connect,
       jsonrpc: '2.0',
       id: message.id,
@@ -146,7 +146,7 @@ export function getMessage(data: string): RPCMessages.RPCMessageType {
       params: message.params,
     };
   } else if ('method' in message) {
-    return {
+    messageType = {
       type: MessageType.Request,
       jsonrpc: '2.0',
       id: message.id,
@@ -154,22 +154,23 @@ export function getMessage(data: string): RPCMessages.RPCMessageType {
       params: message.params,
     };
   } else if ('result' in message) {
-    return {
+    messageType = {
       type: MessageType.Response,
       jsonrpc: '2.0',
       id: message.id,
       result: message.result,
     };
   } else if ('error' in message) {
-    return {
+    messageType = {
       type: MessageType.Error,
       jsonrpc: '2.0',
       id: message.id,
       error: message.error,
     };
   } else {
-    return { type: MessageType.Malformed };
+    messageType = { type: MessageType.Malformed };
   }
+  return messageType;
 }
 
 interface RequestParams {
