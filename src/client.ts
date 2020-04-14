@@ -640,4 +640,7 @@ export class ReconnectingClient {
       }
     }
   }
+  disconnect() {
+    // TODO disconnect method
+  }
 }

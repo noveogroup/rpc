@@ -47,15 +47,10 @@ test('First connection with promise resolves', async () => {
     address: 'ws://localhost:3666',
     token: 'good-client-2',
   });
-  try {
-    await client.init();
-  } catch (e) {
-    console.log(e);
-    console.log(e.stack);
-  }
+  await client.init();
 });
 
-test('First connection with promise resolves', async () => {
+test('First connection with promise rejects', async () => {
   const client = new ReconnectingClient({
     address: 'ws://localhost:3666',
     token: 'bad-client-2',

@@ -36,9 +36,9 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "testRegex": ".test.ts$",
-    "rootDir": "./test",
-    "coverageDirectory": "./coverage",
-    "collectCoverage": true
+    "verbose": true,
+    "testMatch": ["**/*.test.ts"],
+    "collectCoverage": true,
+    "coverageDirectory": "./coverage"
   }
 }
