@@ -130,6 +130,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 						<section class="tsd-index-section ">
 							<h3>Events</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-event tsd-parent-kind-class"><a href="server.html#error" class="tsd-kind-icon">error</a></li>
 								<li class="tsd-kind-event tsd-parent-kind-class"><a href="server.html#rpcclose" class="tsd-kind-icon">rpc<wbr>Close</a></li>
 							</ul>
 						</section>
@@ -196,7 +197,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 							<aside class="tsd-sources">
 								<p>Overrides <a href="clientsocket.server.html">Server</a>.<a href="clientsocket.server.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L133">src/server.ts:133</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L133">src/server.ts:133</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -230,6 +231,48 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Events</h2>
 				<section class="tsd-panel tsd-member tsd-kind-event tsd-parent-kind-class">
+					<a name="error" class="tsd-anchor"></a>
+					<h3>error</h3>
+					<ul class="tsd-signatures tsd-kind-event tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">error<span class="tsd-signature-symbol">(</span>error<span class="tsd-signature-symbol">: </span><a href="errors.notconnectederror.html#error" class="tsd-signature-type">Error</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L268">src/server.ts:268</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Fires when the error happens</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="language-typescript">server.on(<span class="hljs-string">'error'</span>, <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
+  <span class="hljs-keyword">if</span> (e <span class="hljs-keyword">instanceof</span> Errors.InvalidJSONRPCError) {
+    <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Wrong data from client'</span>);
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Error'</span>, e);
+  }
+});</code></pre>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>error: <a href="errors.notconnectederror.html#error" class="tsd-signature-type">Error</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Error instance from <a href="../modules/errors.html">Errors</a> or <a href="client.html#websocket">WebSocket</a> class</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-event tsd-parent-kind-class">
 					<a name="rpcclose" class="tsd-anchor"></a>
 					<h3>rpc<wbr>Close</h3>
 					<ul class="tsd-signatures tsd-kind-event tsd-parent-kind-class">
@@ -239,7 +282,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L238">src/server.ts:238</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L249">src/server.ts:249</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -248,7 +291,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 								</div>
 								<dl class="tsd-comment-tags">
 									<dt>example</dt>
-									<dd><pre><code class="language-typescript">rpc.on(<span class="hljs-string">'rpcClose'</span>, <span class="hljs-function">(<span class="hljs-params">token</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Client disconnected <span class="hljs-subst">${token}</span>`</span>));</code></pre>
+									<dd><pre><code class="language-typescript">server.on(<span class="hljs-string">'rpcClose'</span>, <span class="hljs-function">(<span class="hljs-params">token</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Client disconnected <span class="hljs-subst">${token}</span>`</span>));</code></pre>
 									</dd>
 								</dl>
 							</div>
@@ -286,7 +329,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 					<div class="tsd-signature tsd-kind-icon">devices<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#id" class="tsd-signature-type">Id</a><span class="tsd-signature-symbol">, </span><a href="client.html#websocket" class="tsd-signature-type">WebSocket</a><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L114">src/server.ts:114</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L114">src/server.ts:114</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -296,7 +339,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 					<div class="tsd-signature tsd-kind-icon">methods<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#name" class="tsd-signature-type">Name</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">(</span>ctx<span class="tsd-signature-symbol">: </span><a href="../interfaces/rpccontext.html" class="tsd-signature-type">RPCContext</a>, params<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#jsonvalue" class="tsd-signature-type">JSONValue</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><a href="../globals.html#jsonvalue" class="tsd-signature-type">JSONValue</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L116">src/server.ts:116</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L116">src/server.ts:116</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -328,7 +371,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 					<div class="tsd-signature tsd-kind-icon">requests<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#id" class="tsd-signature-type">Id</a><span class="tsd-signature-symbol">, </span><a href="request.html" class="tsd-signature-type">Request</a><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L124">src/server.ts:124</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L124">src/server.ts:124</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -338,7 +381,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 					<div class="tsd-signature tsd-kind-icon">response<wbr>InProgress<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L133">src/server.ts:133</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L133">src/server.ts:133</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -355,7 +398,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L337">src/server.ts:337</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L367">src/server.ts:367</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/serverstats.html" class="tsd-signature-type">ServerStats</a></h4>
@@ -588,7 +631,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L258">src/server.ts:258</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L288">src/server.ts:288</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -784,7 +827,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L129">src/server.ts:129</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L129">src/server.ts:129</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1161,7 +1204,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L131">src/server.ts:131</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L131">src/server.ts:131</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1298,7 +1341,7 @@ server.register(<span class="hljs-string">'hi'</span>, <span class="hljs-functio
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L319">src/server.ts:319</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L349">src/server.ts:349</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1499,7 +1542,7 @@ ws.call(<span class="hljs-string">'exception'</span>, {})
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/server.ts#L333">src/server.ts:333</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/server.ts#L363">src/server.ts:363</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1550,6 +1593,9 @@ ws.call(<span class="hljs-string">'exception'</span>, {})
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
 								<a href="server.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-event tsd-parent-kind-class">
+								<a href="server.html#error" class="tsd-kind-icon">error</a>
 							</li>
 							<li class=" tsd-kind-event tsd-parent-kind-class">
 								<a href="server.html#rpcclose" class="tsd-kind-icon">rpc<wbr>Close</a>

@@ -85,10 +85,10 @@
                 🠗
  <span class="hljs-comment">// when the client establishes a websocket connection, it can</span>
  <span class="hljs-comment">// 🛑 reject the promise and emits `connectError` event if server refuses</span>
- <span class="hljs-comment">//   the connection. And it stops any connection attempts until you execute</span>
- <span class="hljs-comment">//   `init` method again</span>
+ <span class="hljs-comment">//   the client to connect with its token. Thus it stops any connection</span>
+ <span class="hljs-comment">//   attempts until you execute `init` method again.</span>
  <span class="hljs-comment">// 👌 resolve the promise and emits `connect` event if the server accepts</span>
- <span class="hljs-comment">//   the connection</span>
+ <span class="hljs-comment">//   the connection.</span>
                 🠗
       <span class="hljs-keyword">await</span> client.call(<span class="hljs-string">'serverMethod'</span> {...args});
       client.register(<span class="hljs-string">'method3'</span>, handler3);
@@ -204,6 +204,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="reconnectingclient.html#attachmethodsandlisteners" class="tsd-kind-icon">attach<wbr>Methods<wbr>And<wbr>Listeners</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#call" class="tsd-kind-icon">call</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#disconnect" class="tsd-kind-icon">disconnect</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="reconnectingclient.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#init" class="tsd-kind-icon">init</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="reconnectingclient.html#register" class="tsd-kind-icon">register</a></li>
@@ -227,7 +228,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L410">src/client.ts:410</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L410">src/client.ts:410</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -265,7 +266,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L486">src/client.ts:486</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L462">src/client.ts:462</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -287,7 +288,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L466">src/client.ts:466</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L480">src/client.ts:480</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -309,7 +310,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L477">src/client.ts:477</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L491">src/client.ts:491</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -331,7 +332,7 @@
 					<div class="tsd-signature tsd-kind-icon">connected<wbr>For<wbr>The<wbr>First<wbr>Time<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L394">src/client.ts:394</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L394">src/client.ts:394</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -341,7 +342,7 @@
 					<div class="tsd-signature tsd-kind-icon">instance<span class="tsd-signature-symbol">:</span> <a href="client.html" class="tsd-signature-type">Client</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L386">src/client.ts:386</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L386">src/client.ts:386</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -351,7 +352,7 @@
 					<div class="tsd-signature tsd-kind-icon">interval<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 5000</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L390">src/client.ts:390</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L390">src/client.ts:390</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -361,7 +362,7 @@
 					<div class="tsd-signature tsd-kind-icon">listeners<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#name" class="tsd-signature-type">Name</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EventListenerOrEventListenerObject</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Map()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L396">src/client.ts:396</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L396">src/client.ts:396</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -371,7 +372,7 @@
 					<div class="tsd-signature tsd-kind-icon">methods<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#name" class="tsd-signature-type">Name</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">(</span>params<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, ctx<span class="tsd-signature-symbol">: </span><a href="../interfaces/rpccontext.html" class="tsd-signature-type">RPCContext</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#jsonvalue" class="tsd-signature-type">JSONValue</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><a href="../globals.html#jsonvalue" class="tsd-signature-type">JSONValue</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Map()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L404">src/client.ts:404</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L404">src/client.ts:404</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -381,7 +382,7 @@
 					<div class="tsd-signature tsd-kind-icon">params<span class="tsd-signature-symbol">:</span> <a href="../interfaces/clientoptions.html" class="tsd-signature-type">ClientOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L388">src/client.ts:388</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L388">src/client.ts:388</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -391,7 +392,7 @@
 					<div class="tsd-signature tsd-kind-icon">server<wbr>Rejected<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L392">src/client.ts:392</a></li>
+							<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L392">src/client.ts:392</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -408,7 +409,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L578">src/client.ts:578</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L571">src/client.ts:571</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -437,7 +438,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L632">src/client.ts:632</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L631">src/client.ts:631</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -454,7 +455,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L517">src/client.ts:517</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L510">src/client.ts:510</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -496,6 +497,23 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="disconnect" class="tsd-anchor"></a>
+					<h3>disconnect</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">disconnect<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L643">src/client.ts:643</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 					<a name="dispatchevent" class="tsd-anchor"></a>
 					<h3>dispatch<wbr>Event</h3>
@@ -506,7 +524,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L594">src/client.ts:594</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L587">src/client.ts:587</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -538,7 +556,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L428">src/client.ts:428</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L428">src/client.ts:428</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -567,7 +585,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L558">src/client.ts:558</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L551">src/client.ts:551</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -638,15 +656,30 @@ server.call(<span class="hljs-string">'&lt;YOUR_TOKEN&gt;'</span>, <span class="
 					<a name="removealllisteners" class="tsd-anchor"></a>
 					<h3>remove<wbr>All<wbr>Listeners</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">remove<wbr>All<wbr>Listeners<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">remove<wbr>All<wbr>Listeners<span class="tsd-signature-symbol">(</span>totallyRemove<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L624">src/client.ts:624</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L623">src/client.ts:623</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Additional method to remove all listeners. See
+									<a href="https://html.spec.whatwg.org/multipage/web-sockets.html#garbage-collection-2">https://html.spec.whatwg.org/multipage/web-sockets.html#garbage-collection-2</a></p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> totallyRemove: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Remove them only from the websocket instance</p>
+									</div>
+								</li>
+							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
@@ -655,13 +688,13 @@ server.call(<span class="hljs-string">'&lt;YOUR_TOKEN&gt;'</span>, <span class="
 					<a name="removeeventlistener" class="tsd-anchor"></a>
 					<h3>remove<wbr>Event<wbr>Listener</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">remove<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, listener<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EventListenerOrEventListenerObject</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">remove<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, listener<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EventListenerOrEventListenerObject</span>, totallyRemove<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L611">src/client.ts:611</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L604">src/client.ts:604</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -671,6 +704,9 @@ server.call(<span class="hljs-string">'&lt;YOUR_TOKEN&gt;'</span>, <span class="
 								</li>
 								<li>
 									<h5>listener: <span class="tsd-signature-type">EventListenerOrEventListenerObject</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> totallyRemove: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -687,7 +723,7 @@ server.call(<span class="hljs-string">'&lt;YOUR_TOKEN&gt;'</span>, <span class="
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/agsh/rpc/blob/2412634/src/client.ts#L571">src/client.ts:571</a></li>
+									<li>Defined in <a href="https://github.com/agsh/rpc/blob/07c2d61/src/client.ts#L564">src/client.ts:564</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -764,6 +800,9 @@ server.call(<span class="hljs-string">'&lt;YOUR_TOKEN&gt;'</span>, <span class="
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="reconnectingclient.html#call" class="tsd-kind-icon">call</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="reconnectingclient.html#disconnect" class="tsd-kind-icon">disconnect</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="reconnectingclient.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
