@@ -1,13 +1,14 @@
 import kindOf from 'kind-of';
 import Server from '../src/server';
-import { ReconnectingClient } from '../src/client';
+import { ClientOptions, ReconnectingClient } from '../src/client';
 import { Errors } from '../src/errors';
 
 const port = 3667;
 const timeOut = 10000;
-const serverParams = () => ({
+const serverParams: () => ClientOptions = () => ({
   address: `ws://localhost:${port}`,
   token: `good-client-${Math.random()}`,
+  prepareContext: (id) => id,
 });
 let server!: Server;
 
