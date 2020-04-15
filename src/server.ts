@@ -299,7 +299,7 @@ export default class Server extends WebSocket.Server {
     const id = v4();
     return new Promise((resolve, reject) => {
       const request = new Request({
-        timeout: 5000,
+        timeout: RPCHelpers.RequestTimeout,
         resolve,
         reject,
         destructor: () => {

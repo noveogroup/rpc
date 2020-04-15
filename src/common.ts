@@ -204,6 +204,8 @@ export class Request {
 }
 
 export namespace RPCHelpers {
+  export const RequestTimeout = 3000;
+
   export function rpcRequest(method: Name, params: any, id: Id): string {
     return JSON.stringify({
       jsonrpc: '2.0',

@@ -205,7 +205,7 @@ export default class Client extends WebSocket {
     const id = v4();
     return new Promise((resolve, reject) => {
       const request = new Request({
-        timeout: 5000,
+        timeout: RPCHelpers.RequestTimeout,
         resolve,
         reject,
         destructor: () => {
