@@ -285,13 +285,15 @@ export default class Server extends WebSocket.Server {
    * - {@link Errors.RequestError} When the method call on the client side
    * triggered an exception
    */
-  async call(
+  call(
     token: Id,
     method: Name,
     params?: Record<string, any>,
   ): Promise<JSONValue> {
     const device = this.devices.get(token);
+    console.log('device', device);
     if (!device) {
+      console.log('throw?');
       throw new Errors.NotConnectedError(
         `Client with token: ${token} doesn't connected`,
       );
