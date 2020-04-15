@@ -24,7 +24,7 @@ beforeAll(async () => {
   client.register('exception', async () => {
     throw new Error('client exception');
   });
-  client.register('mirror', (_ctx, params) => params);
+  client.register('mirror', (params, _ctx) => params);
 });
 
 afterAll(() => {
@@ -61,4 +61,34 @@ test('call nonexistent method', async () => {
   await expect(server.call(token, 'quasi method')).rejects.toBeInstanceOf(
     Errors.ProcedureNotFoundError,
   );
+});
+
+test('call with the wrong message', async () => {
+  await new Promise((resolve) => {
+    client.addEventListener('error', (e) => {
+      expect(e.type).toBe('InvalidJSONRPCError');
+      expect((e as CustomEvent).detail).toBe(
+        'Malformed message: bad json-rpc message',
+      );
+      resolve();
+    });
+    // @ts-ignore
+    server.devices.get(token).send('bad json-rpc message');
+  });
+});
+
+test('call with the parameters', async () => {
+  const result = await server.call(token, 'mirror', { a: 1, b: { c: 2 } });
+  expect(result).toEqual({ a: 1, b: { c: 2 } });
+});
+
+test('call without params', async () => {
+  await expect(server.call(token, 'mirror')).resolves.toEqual(null);
+  await expect(server.call(token, 'mirror', undefined)).resolves.toEqual(null);
+});
+
+test('call when not connected', async () => {
+  expect(() => {
+    server.call('nonexistent client', 'ping');
+  }).toThrowError(Errors.NotConnectedError);
 });
