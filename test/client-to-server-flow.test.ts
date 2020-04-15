@@ -4,6 +4,7 @@ import { ReconnectingClient } from '../src/client';
 import { Errors } from '../src/errors';
 
 const port = 3667;
+const timeOut = 10000;
 const serverParams = () => ({
   address: `ws://localhost:${port}`,
   token: `good-client-${Math.random()}`,
@@ -22,11 +23,13 @@ beforeAll(() => {
     throw new Error('server exception');
   });
   server.register('mirror', (_ctx, params) => params);
+  server.register('wait', async () => {
+    await new Promise((resolve) => setTimeout(resolve, timeOut));
+    return 'time!';
+  });
 });
 
-afterAll(() => {
-  server.close();
-});
+afterAll(() => server.close());
 
 test('simple call with promise object value', async () => {
   const client = new ReconnectingClient(serverParams());
@@ -118,4 +121,11 @@ test('call when not connected', async () => {
   expect(() => {
     client.call('ping');
   }).toThrowError(Errors.NotConnectedError);
+});
+
+test('request timeout', async () => {
+  jest.setTimeout(timeOut);
+  const client = new ReconnectingClient(serverParams());
+  await client.init();
+  await expect(client.call('wait')).rejects.toBeInstanceOf(Errors.RequestError);
 });

@@ -1,6 +1,8 @@
 /**
  * An alias for unique id, ex. rpc-message id, device token and so.
  */
+import { Errors } from './errors';
+
 export type Id = string;
 /**
  * An alias for method names
@@ -128,7 +130,7 @@ export enum MessageType {
  * @internal
  */
 export function getMessage(data: string): RPCMessages.RPCMessageType {
-  let message: any;
+  let message: Record<string, any>;
   try {
     message = JSON.parse(data);
   } catch (e) {
@@ -193,7 +195,7 @@ export class Request {
 
   constructor({ timeout = 5000, resolve, reject, destructor }: RequestParams) {
     this.timer = (setTimeout(() => {
-      this.reject(new Error('dual-rpc-ws request timeout'));
+      this.reject(new Errors.RequestError('dual-rpc-ws request timeout'));
       destructor();
     }, timeout) as any) as number;
     this.resolve = resolve;

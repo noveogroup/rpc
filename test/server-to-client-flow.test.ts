@@ -3,6 +3,7 @@ import Server from '../src/server';
 import { ReconnectingClient } from '../src/client';
 import { Errors } from '../src/errors';
 
+const timeOut = 10000;
 const port = 3668;
 const token = 'good-client';
 let server!: Server;
@@ -25,11 +26,13 @@ beforeAll(async () => {
     throw new Error('client exception');
   });
   client.register('mirror', (params, _ctx) => params);
+  client.register('wait', async () => {
+    await new Promise((resolve) => setTimeout(resolve, timeOut));
+    return 'time!';
+  });
 });
 
-afterAll(() => {
-  server.close();
-});
+afterAll(() => server.close());
 
 test('simple call with promise object value', async () => {
   await expect(server.call(token, 'promise')).resolves.toMatchObject({
@@ -91,4 +94,11 @@ test('call when not connected', async () => {
   expect(() => {
     server.call('nonexistent client', 'ping');
   }).toThrowError(Errors.NotConnectedError);
+});
+
+test('request timeout', async () => {
+  jest.setTimeout(timeOut);
+  await expect(server.call(token, 'wait')).rejects.toBeInstanceOf(
+    Errors.RequestError,
+  );
 });
