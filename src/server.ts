@@ -291,9 +291,7 @@ export default class Server extends WebSocket.Server {
     params?: Record<string, any>,
   ): Promise<JSONValue> {
     const device = this.devices.get(token);
-    console.log('device', device);
     if (!device) {
-      console.log('throw?');
       throw new Errors.NotConnectedError(
         `Client with token: ${token} doesn't connected`,
       );

@@ -96,6 +96,20 @@ test('call when not connected', async () => {
   }).toThrowError(Errors.NotConnectedError);
 });
 
+test('unregister method', async () => {
+  await expect(server.call(token, 'simple')).resolves.toEqual({
+    client: 'pong',
+  });
+  // @ts-ignore
+  const methodCount = client.methods.size;
+  client.unregister('simple');
+  // @ts-ignore
+  expect(client.methods.size).toEqual(methodCount - 1);
+  await expect(server.call(token, 'simple')).rejects.toBeInstanceOf(
+    Errors.ProcedureNotFoundError,
+  );
+});
+
 test('request timeout', async () => {
   jest.setTimeout(timeOut);
   await expect(server.call(token, 'wait')).rejects.toBeInstanceOf(

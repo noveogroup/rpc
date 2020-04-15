@@ -410,7 +410,7 @@ export class ReconnectingClient {
 
   private readonly params: ClientOptions;
 
-  private interval = 5000;
+  private interval = 3000;
 
   private serverRejected = false;
 
@@ -671,5 +671,6 @@ export class ReconnectingClient {
   }
   disconnect() {
     // TODO disconnect method
+    this.instance?.close();
   }
 }

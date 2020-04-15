@@ -123,6 +123,20 @@ test('call when not connected', async () => {
   }).toThrowError(Errors.NotConnectedError);
 });
 
+test('unregister method', async () => {
+  const client = new ReconnectingClient(serverParams());
+  await client.init();
+  await expect(client.call('simple')).resolves.toEqual({ server: 'pong' });
+  // @ts-ignore
+  const methodCount = server.methods.size;
+  server.unregister('simple');
+  // @ts-ignore
+  expect(server.methods.size).toEqual(methodCount - 1);
+  await expect(client.call('simple')).rejects.toBeInstanceOf(
+    Errors.ProcedureNotFoundError,
+  );
+});
+
 test('request timeout', async () => {
   jest.setTimeout(timeOut);
   const client = new ReconnectingClient(serverParams());
