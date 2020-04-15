@@ -21,6 +21,7 @@ const server: ServerSingleton = {
     }
     this.instance = new Server({ port });
     this.instance.register('ping', () => ({ server: 'pong' }));
+    this.instance.on('message', (msg) => console.log('msg', msg));
   },
   stop: function() {
     return new Promise((resolve, reject) => {
@@ -38,6 +39,7 @@ const server: ServerSingleton = {
   },
 };
 
+beforeAll(() => jest.setTimeout(15000));
 afterAll(() => server.stop());
 
 test('simple reconnection', async () => {
@@ -45,6 +47,7 @@ test('simple reconnection', async () => {
   const client = new ReconnectingClient(serverParams());
   await client.init();
   await server.stop();
+  await expect(client.call('ping')).rejects.toBeInstanceOf(Error);
   return new Promise(async (resolve) => {
     client.addEventListener('connect', async () => {
       await expect(client.call('ping')).resolves.toEqual({ server: 'pong' });
@@ -55,14 +58,12 @@ test('simple reconnection', async () => {
 });
 
 test('connect when the server does not yet started', async () => {
-  jest.setTimeout(15000);
   await server.stop();
   const client = new ReconnectingClient(serverParams());
   await Promise.all([
     new Promise(async (resolve) => {
       client.addEventListener('connect', async () => {
         await expect(client.call('ping')).resolves.toEqual({ server: 'pong' });
-        jest.setTimeout(5000);
         resolve();
       });
       await server.start();

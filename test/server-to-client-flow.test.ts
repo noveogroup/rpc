@@ -112,7 +112,13 @@ test('unregister method', async () => {
 
 test('request timeout', async () => {
   jest.setTimeout(timeOut);
-  await expect(server.call(token, 'wait')).rejects.toBeInstanceOf(
-    Errors.RequestError,
-  );
+  await Promise.all([
+    expect(server.call(token, 'wait')).rejects.toBeInstanceOf(
+      Errors.RequestError,
+    ),
+    (() => {
+      console.log(server.stats);
+      expect(server.stats.requestsInProgress).toBeGreaterThan(0);
+    })(),
+  ]);
 });
