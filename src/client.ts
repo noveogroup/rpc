@@ -44,6 +44,11 @@ export interface ClientOptions {
    */
   prepareContext?: (ctx: RPCContext) => any;
   /**
+   * @ignore
+   * @internal
+   */
+  errorHandler?: (error: Error) => any;
+  /**
    * Set of protocols inherited from {@link WebSocket.constructor}
    */
   protocols?: string | string[];
@@ -98,6 +103,8 @@ export default class Client extends WebSocket {
 
   private readonly prepareContext: (ctx: RPCContext) => any = (ctx) => ctx;
 
+  private readonly errorHandler: (error: Error) => any = () => {};
+
   /**
    * Connect to the server using an address and unique id that specifies the client
    * @param params An object which passed out to define all the main properties
@@ -113,6 +120,9 @@ export default class Client extends WebSocket {
     if (params.prepareContext) {
       this.prepareContext = params.prepareContext;
     }
+    if (params.errorHandler) {
+      this.errorHandler = params.errorHandler;
+    }
 
     this.addEventListener('open', () => {
       this.send(RPCHelpers.rpcRequest('connect', { id: params.token }, v4()));
@@ -122,9 +132,12 @@ export default class Client extends WebSocket {
       const message = getMessage(event.data);
       switch (message.type) {
         case MessageType.Malformed:
-          throw new Errors.InvalidJSONRPCError(
-            `Malformed message: ${event.data}`,
+          return this.errorHandler(
+            new Errors.InvalidJSONRPCError(`Malformed message: ${event.data}`),
           );
+        // throw new Errors.InvalidJSONRPCError(
+        //   `Malformed message: ${event.data}`,
+        // );
         case MessageType.Connect:
           this.handshake(message.params.result!);
           break;
@@ -150,7 +163,10 @@ export default class Client extends WebSocket {
         case MessageType.Error:
           const request = this.requests.get(message.id);
           if (!request) {
-            throw new Errors.RequestError(`Wrong request id: ${message.id}`);
+            return this.errorHandler(
+              new Errors.RequestError(`Wrong request id: ${message.id}`),
+            );
+            // throw new Errors.RequestError(`Wrong request id: ${message.id}`);
           }
           message.type === MessageType.Response
             ? request.resolve(message.result)
@@ -253,8 +269,15 @@ export default class Client extends WebSocket {
 /**
  * @ignore
  */
-class ReconnectingClientEvent implements Event {
-  constructor() {}
+class CustomEvent implements Event {
+  type: string;
+  detail: any;
+  constructor(type?: Name, options?: { detail: any }) {
+    this.type = type ?? 'CustomEvent';
+    if (options?.detail) {
+      this.detail = options.detail;
+    }
+  }
   readonly AT_TARGET: number = 0;
   readonly BUBBLING_PHASE: number = 1;
   readonly CAPTURING_PHASE: number = 2;
@@ -271,7 +294,6 @@ class ReconnectingClientEvent implements Event {
   readonly srcElement: null;
   readonly target: null;
   readonly timeStamp: number = Date.now();
-  readonly type: string = 'ReconnectingClientEvent';
   composedPath(): EventTarget[] {
     return [];
   }
@@ -285,8 +307,9 @@ class ReconnectingClientEvent implements Event {
  * @ignore
  */
 type ReconnectingClientEventMap = {
-  connect: ReconnectingClientEvent;
-  connectError: ReconnectingClientEvent;
+  connect: CustomEvent;
+  connectError: CustomEvent;
+  error: CustomEvent;
 };
 
 /**
@@ -438,6 +461,12 @@ export class ReconnectingClient {
             this.connectError(); // event
           }
         },
+        errorHandler: (error) => {
+          this.dispatchEvent(
+            'error',
+            new CustomEvent(error.name, { detail: error.message }),
+          );
+        },
       });
       this.instance.addEventListener('close', async (_event) => {
         this.removeAllListeners(false);
@@ -480,7 +509,7 @@ export class ReconnectingClient {
   connect() {
     this.connectedForTheFirstTime = true;
     this.attachMethodsAndListeners();
-    this.dispatchEvent('connect', new ReconnectingClientEvent());
+    this.dispatchEvent('connect', new CustomEvent('connect'));
   }
 
   /**
@@ -490,7 +519,7 @@ export class ReconnectingClient {
    */
   connectError() {
     this.serverRejected = true;
-    this.dispatchEvent('connectError', new ReconnectingClientEvent());
+    this.dispatchEvent('connectError', new CustomEvent('connectError'));
   }
 
   /**
