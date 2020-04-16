@@ -1,4 +1,4 @@
-import Server from '../src/server';
+import { Server } from '../src';
 import { ReconnectingClient } from '../src/client';
 
 let server!: Server;

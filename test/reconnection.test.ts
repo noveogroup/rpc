@@ -1,5 +1,6 @@
 import Server from '../src/server';
 import { ReconnectingClient } from '../src/client';
+import { Err } from 'typedoc/dist/lib/utils/result';
 
 const port = 3669;
 const serverParams = () => ({
@@ -73,5 +74,3 @@ test('connect when the server does not yet started', async () => {
     })(),
   ]);
 });
-
-test('disconnect the client correctly', () => {});

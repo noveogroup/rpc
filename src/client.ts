@@ -670,7 +670,6 @@ export class ReconnectingClient {
     }
   }
   disconnect() {
-    // TODO disconnect method
     this.instance?.close();
   }
 }
