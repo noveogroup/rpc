@@ -9,8 +9,8 @@
     "build": "tsc --build tsconfig.json && tsc --build tsconfig.client.json",
     "prepare": "npm run-script build",
     "prepublishOnly": "npm run build && npm run docs",
-    "node": "npm run build && node build/test.js",
-    "react": "npm run build && copy \"./*.js\" \"../RNN/node_modules/@noveo/dual-rpc-ws\" && copy \"./*.d.ts\" \"../RNN/node_modules/@noveo/dual-rpc-ws\"",
+    "_node": "tsc --build tsconfig.json && node build/test/test.js",
+    "_react": "npm run build && copy \"./*.js\" \"../RNN/node_modules/@noveo/dual-rpc-ws\" && copy \"./*.d.ts\" \"../RNN/node_modules/@noveo/dual-rpc-ws\"",
     "test": "jest",
     "coverage": "jest --coverage"
   },
