@@ -19,3 +19,4 @@ node_modules/
 *.js
 *.d.ts
 *.js.map
+test/test.ts
