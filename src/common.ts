@@ -26,6 +26,7 @@ namespace RPCMessages {
     params: {
       id?: Id;
       result?: boolean;
+      message?: string;
     };
   }
 

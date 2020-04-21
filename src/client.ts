@@ -25,7 +25,7 @@ export interface ClientOptions {
    * @param result The result of the handshaking. If true - everything is ok.
    * Otherwise - server doesn't allow connection and the websocket is closed
    */
-  handshake?: (result: boolean) => void;
+  handshake?: (result: boolean, message?: string) => void;
   /**
    * Optional function to define initial context for the {@link Client.register}
    * handlers. By default it returns the {@link RPCContext} object
@@ -99,7 +99,7 @@ export default class Client extends WebSocket {
 
   private requests: Map<Id, Request> = new Map();
 
-  handshake: (connected: boolean) => void = () => {};
+  handshake: (connected: boolean, message?: string) => void = () => {};
 
   private readonly prepareContext: (ctx: RPCContext) => any = (ctx) => ctx;
 
@@ -139,7 +139,7 @@ export default class Client extends WebSocket {
         //   `Malformed message: ${event.data}`,
         // );
         case MessageType.Connect:
-          this.handshake(message.params.result!);
+          this.handshake(message.params.result!, message.params.message);
           break;
         case MessageType.Request:
           const method = this.methods.get(message.method);
@@ -453,12 +453,12 @@ export class ReconnectingClient {
     return new Promise((resolve, reject) => {
       this.instance = new Client({
         ...this.params,
-        handshake: (connected) => {
+        handshake: (connected, message) => {
           if (connected) {
             this.connect(); // event
             resolve(this);
           } else {
-            this.connectError(); // event
+            this.connectError(message); // event
           }
         },
         errorHandler: (error) => {
@@ -517,9 +517,14 @@ export class ReconnectingClient {
    * attempt
    * @event reconnectError
    */
-  connectError() {
+  connectError(message?: string) {
     this.serverRejected = true;
-    this.dispatchEvent('connectError', new CustomEvent('connectError'));
+    this.dispatchEvent(
+      'connectError',
+      new CustomEvent('connectError', {
+        detail: message ?? 'Server rejected the connection',
+      }),
+    );
   }
 
   /**

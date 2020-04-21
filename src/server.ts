@@ -184,10 +184,26 @@ export default class Server extends WebSocket.Server {
             }
             this.devices.set(message.params.id, ws);
             ws.token = message.params.id;
-            let result = await this.handshake(message.params.id, ws);
-            ws.send(RPCHelpers.rpcRequest('connect', { result }, message.id));
-            if (!result) {
-              ws.close();
+            try {
+              let result = await this.handshake(message.params.id, ws);
+              ws.send(
+                RPCHelpers.rpcRequest(
+                  'connect',
+                  { result, message: 'Server rejected the connection' },
+                  message.id,
+                ),
+              );
+              if (!result) {
+                ws.close();
+              }
+            } catch (e) {
+              ws.send(
+                RPCHelpers.rpcRequest(
+                  'connect',
+                  { result: false, message: e.message },
+                  message.id,
+                ),
+              );
             }
             break;
           case MessageType.Request:
