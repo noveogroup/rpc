@@ -1,7 +1,6 @@
 import { Server } from '../src';
 import { ReconnectingClient } from '../src/client';
 import { Errors } from '../src/errors';
-import NotConnectedError = Errors.NotConnectedError;
 
 let server!: Server;
 
@@ -60,9 +59,6 @@ test('First connection with promise rejects', async () => {
     address: 'ws://localhost:3666',
     token: 'bad-client-2',
   });
-  client.addEventListener('message', (m) => {
-    console.log(1, m);
-  });
   await expect(client.init()).rejects.toThrow(
     new Errors.NotConnectedError('Server rejected the connection'),
   );
@@ -73,16 +69,19 @@ test('First connection with throwing a server exception', async () => {
     address: 'ws://localhost:3666',
     token: 'handshakeThrow',
   });
-  client.addEventListener('message', (m) => {
-    console.log(2, m);
-  });
-  // try {
-  //   await client.init();
-  // } catch (e) {
-  //   console.log(e);
-  //   console.log(e.message);
-  // }
   await expect(client.init()).rejects.toThrow(
     new Errors.NotConnectedError('throw in handshake'),
   );
+});
+
+test('Init when already connected, disconnection, call when disconnected', async () => {
+  const client = new ReconnectingClient({
+    address: 'ws://localhost:3666',
+    token: 'good-client-3',
+  });
+  await client.init();
+  await expect(client.init()).rejects.toThrow(Errors.AlreadyConnected);
+  await client.disconnect();
+  await expect(client.call('method')).rejects.toThrow(Errors.NotConnectedError);
+  await client.init();
 });

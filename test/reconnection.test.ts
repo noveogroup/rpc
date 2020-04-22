@@ -1,6 +1,5 @@
 import Server from '../src/server';
 import { ReconnectingClient } from '../src/client';
-import { Err } from 'typedoc/dist/lib/utils/result';
 
 const port = 3669;
 const serverParams = () => ({
@@ -63,7 +62,8 @@ test('connect when the server does not yet started', async () => {
   const client = new ReconnectingClient(serverParams());
   await Promise.all([
     new Promise(async (resolve) => {
-      client.addEventListener('connect', async () => {
+      client.addEventListener('connect', async (e) => {
+        expect(e.composedPath()).toBeInstanceOf(Array);
         await expect(client.call('ping')).resolves.toEqual({ server: 'pong' });
         resolve();
       });
