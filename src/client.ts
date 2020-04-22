@@ -454,7 +454,6 @@ export class ReconnectingClient {
       this.instance = new Client({
         ...this.params,
         handshake: (connected, message) => {
-          console.log('handshake', connected, message);
           if (connected) {
             this.connect(); // event
             resolve(this);
@@ -490,7 +489,6 @@ export class ReconnectingClient {
    * @event close
    */
   async close() {
-    console.log('this.serverRejected', this.serverRejected);
     if (!this.serverRejected) {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
