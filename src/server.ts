@@ -204,6 +204,7 @@ export default class Server extends WebSocket.Server {
                   message.id,
                 ),
               );
+              ws.close();
             }
             break;
           case MessageType.Request:
