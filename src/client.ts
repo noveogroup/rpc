@@ -454,6 +454,7 @@ export class ReconnectingClient {
       this.instance = new Client({
         ...this.params,
         handshake: (connected, message) => {
+          console.log('handshake', connected, message);
           if (connected) {
             this.connect(); // event
             resolve(this);
@@ -489,6 +490,7 @@ export class ReconnectingClient {
    * @event close
    */
   async close() {
+    console.log('this.serverRejected', this.serverRejected);
     if (!this.serverRejected) {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -498,6 +500,7 @@ export class ReconnectingClient {
         }, this.interval);
       });
     } else {
+      this.serverRejected = false;
       throw new Errors.NotConnectedError(`The server rejected the connection`);
     }
   }
