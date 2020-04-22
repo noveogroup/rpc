@@ -117,7 +117,6 @@ test('request timeout', async () => {
       Errors.RequestError,
     ),
     (() => {
-      console.log(server.stats);
       expect(server.stats.requestsInProgress).toBeGreaterThan(0);
     })(),
   ]);
