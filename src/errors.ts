@@ -26,4 +26,11 @@ export namespace Errors {
       this.name = 'RequestError';
     }
   }
+
+  export class AlreadyConnected extends Error {
+    constructor() {
+      super();
+      this.name = 'AlreadyConnected';
+    }
+  }
 }

@@ -178,21 +178,12 @@ export default class Server extends WebSocket.Server {
                   `No connection id presents in ${message.id}`,
                 ),
               );
-              // throw new Errors.InvalidJSONRPCError(
-              //   `No connection id presents in ${message.id}`,
-              // );
             }
             this.devices.set(message.params.id, ws);
             ws.token = message.params.id;
             try {
-              let result = await this.handshake(message.params.id, ws);
-              ws.send(
-                RPCHelpers.rpcRequest(
-                  'connect',
-                  { result, message: 'Server rejected the connection' },
-                  message.id,
-                ),
-              );
+              const result = await this.handshake(message.params.id, ws);
+              ws.send(RPCHelpers.rpcRequest('connect', { result }, message.id));
               if (!result) {
                 ws.close();
               }

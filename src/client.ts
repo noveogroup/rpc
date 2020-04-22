@@ -412,7 +412,7 @@ export class ReconnectingClient {
 
   private interval = 3000;
 
-  private serverRejected = false;
+  private serverRejected = '';
 
   private connectedForTheFirstTime = false;
 
@@ -449,6 +449,9 @@ export class ReconnectingClient {
    * refuses the client to connect.
    */
   async init(): Promise<ReconnectingClient> {
+    if (this.instance && this.instance.readyState === this.instance?.OPEN) {
+      throw new Errors.AlreadyConnected();
+    }
     this.connectedForTheFirstTime = false;
     return new Promise((resolve, reject) => {
       this.instance = new Client({
@@ -470,15 +473,12 @@ export class ReconnectingClient {
       });
       this.instance.addEventListener('close', async (_event) => {
         this.removeAllListeners(false);
-        try {
+        if (this.serverRejected && !this.connectedForTheFirstTime) {
+          const msg = this.serverRejected;
+          this.serverRejected = '';
+          reject(new Errors.NotConnectedError(msg));
+        } else {
           await this.close();
-          if (!this.connectedForTheFirstTime) {
-            resolve(this);
-          }
-        } catch (e) {
-          if (!this.connectedForTheFirstTime) {
-            reject(e);
-          }
         }
       });
     });
@@ -489,18 +489,13 @@ export class ReconnectingClient {
    * @event close
    */
   async close() {
-    if (!this.serverRejected) {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          this.init()
-            .then(() => resolve(this))
-            .catch(reject);
-        }, this.interval);
-      });
-    } else {
-      this.serverRejected = false;
-      throw new Errors.NotConnectedError(`The server rejected the connection`);
-    }
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        this.init()
+          .then(() => resolve(this))
+          .catch(reject);
+      }, this.interval);
+    });
   }
 
   /**
@@ -519,11 +514,11 @@ export class ReconnectingClient {
    * @event reconnectError
    */
   connectError(message?: string) {
-    this.serverRejected = true;
+    this.serverRejected = message ?? 'Server rejected the connection';
     this.dispatchEvent(
       'connectError',
       new CustomEvent('connectError', {
-        detail: message ?? 'Server rejected the connection',
+        detail: this.serverRejected,
       }),
     );
   }
