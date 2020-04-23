@@ -10,3 +10,5 @@ typedoc.json
 docs
 noveo*.tgz
 build/test*
+test
+coverage
