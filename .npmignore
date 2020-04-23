@@ -12,3 +12,4 @@ noveo*.tgz
 build/test*
 test
 coverage
+.github
