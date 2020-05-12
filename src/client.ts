@@ -92,7 +92,7 @@ export default class Client extends WebSocket {
   private methods: Map<
     Name,
     (
-      params: Record<string, any>,
+      params: Record<string, any> | null,
       ctx: RPCContext,
     ) => Promise<JSONValue> | JSONValue | undefined
   > = new Map();
@@ -250,7 +250,7 @@ export default class Client extends WebSocket {
   register(
     method: Name,
     handler: (
-      params: Record<string, any>,
+      params: Record<string, any> | null,
       ctx: RPCContext,
     ) => Promise<JSONValue> | JSONValue | undefined,
   ) {
@@ -427,10 +427,12 @@ export class ReconnectingClient {
   private methods: Map<
     Name,
     (
-      params: Record<string, any>,
+      params: Record<string, any> | null,
       ctx: RPCContext,
     ) => Promise<JSONValue> | JSONValue | undefined
   > = new Map();
+
+  private isDisconnecting = false;
 
   /**
    * Creates the Client instance
@@ -453,6 +455,7 @@ export class ReconnectingClient {
       throw new Errors.AlreadyConnected();
     }
     this.connectedForTheFirstTime = false;
+    this.isDisconnecting = false;
     return new Promise((resolve, reject) => {
       this.instance = new Client({
         ...this.params,
@@ -473,7 +476,9 @@ export class ReconnectingClient {
       });
       this.instance.addEventListener('close', async (_event) => {
         this.removeAllListeners(false);
-        if (this.serverRejected && !this.connectedForTheFirstTime) {
+        if (this.isDisconnecting) {
+          return;
+        } else if (this.serverRejected && !this.connectedForTheFirstTime) {
           const msg = this.serverRejected;
           this.serverRejected = '';
           reject(new Errors.NotConnectedError(msg));
@@ -581,7 +586,7 @@ export class ReconnectingClient {
   register(
     method: string,
     handler: (
-      params: Record<string, any>,
+      params: Record<string, any> | null,
       ctx: RPCContext,
     ) => Promise<JSONValue> | JSONValue | undefined,
   ) {
@@ -670,7 +675,9 @@ export class ReconnectingClient {
       }
     }
   }
+
   disconnect() {
+    this.isDisconnecting = true;
     this.instance?.close();
   }
 }

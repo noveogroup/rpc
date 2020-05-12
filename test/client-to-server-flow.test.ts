@@ -144,3 +144,19 @@ test('request timeout', async () => {
   await client.init();
   await expect(client.call('wait')).rejects.toBeInstanceOf(Errors.RequestError);
 });
+
+test('closing', async () => {
+  const client = new ReconnectingClient(serverParams());
+  await client.init();
+  //@ts-ignore
+  expect(client.instance.readyState === client.instance.OPEN);
+  await client.disconnect();
+  //@ts-ignore
+  expect(client.instance.readyState === client.instance.CLOSED);
+  await client.init();
+  //@ts-ignore
+  expect(client.instance.readyState === client.instance.OPEN);
+  await expect(client.call('promise')).resolves.toMatchObject({
+    server: 'pong',
+  });
+});
