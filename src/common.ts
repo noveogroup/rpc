@@ -60,7 +60,7 @@ namespace RPCMessages {
     jsonrpc: '2.0';
     id: Id;
     method: Name;
-    params: Record<string, any>;
+    params: Record<string, any> | null;
   }
 
   /**
