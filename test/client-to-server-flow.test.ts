@@ -113,8 +113,8 @@ test('call with the parameters', async () => {
 test('call without params', async () => {
   const client = new ReconnectingClient(serverParams());
   await client.init();
-  await expect(client.call('mirror')).resolves.toEqual(null);
-  await expect(client.call('mirror', undefined)).resolves.toEqual(null);
+  await expect(client.call('mirror')).resolves.toStrictEqual({});
+  await expect(client.call('mirror', undefined)).resolves.toStrictEqual({});
 });
 
 test('call when not connected', async () => {

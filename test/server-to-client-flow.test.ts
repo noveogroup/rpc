@@ -86,8 +86,10 @@ test('call with the parameters', async () => {
 });
 
 test('call without params', async () => {
-  await expect(server.call(token, 'mirror')).resolves.toEqual(null);
-  await expect(server.call(token, 'mirror', undefined)).resolves.toEqual(null);
+  await expect(server.call(token, 'mirror')).resolves.toStrictEqual({});
+  await expect(server.call(token, 'mirror', undefined)).resolves.toStrictEqual(
+    {},
+  );
 });
 
 test('call when not connected', async () => {

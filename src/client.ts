@@ -213,7 +213,7 @@ export default class Client extends WebSocket {
         },
       });
       this.requests.set(id, request);
-      this.send(RPCHelpers.rpcRequest(method, params ?? null, id));
+      this.send(RPCHelpers.rpcRequest(method, params ?? {}, id));
     });
   }
 

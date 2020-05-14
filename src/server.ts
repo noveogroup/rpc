@@ -315,7 +315,7 @@ export default class Server extends WebSocket.Server {
         },
       });
       this.requests.set(id, request);
-      device.send(RPCHelpers.rpcRequest(method, params ?? null, id));
+      device.send(RPCHelpers.rpcRequest(method, params ?? {}, id));
     });
   }
 
